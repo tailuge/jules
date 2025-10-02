@@ -1,0 +1,30 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.panel {
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.top-panel {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #fff;
+    border-bottom: 2px solid #ccc;
+}
+
+.bottom-panel {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+}

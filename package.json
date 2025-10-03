@@ -1,0 +1,15 @@
+{
+  "name": "traditional-chinese-study-tool",
+  "version": "1.0.0",
+  "description": "A pure JavaScript and HTML project for studying Traditional Chinese.",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server .",
+    "test": "node tests/test.js",
+    "format": "prettier --write \"**/*.{html,js}\""
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "prettier": "^3.0.0"
+  }
+}

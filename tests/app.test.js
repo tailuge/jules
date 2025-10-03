@@ -42,4 +42,38 @@ describe('app', () => {
 
     expect(localStorage.getItem('textUnderStudy')).toBe(testText);
   });
+
+  test('settings should have a default HSK level of 3', () => {
+    // The beforeEach initializes the app, which loads settings.
+    // Since localStorage is cleared, it should be the default value.
+    expect(window.app.settings.hskLevel).toBe(3);
+  });
+
+  test('settings should load HSK level from localStorage', () => {
+    const settings = { hskLevel: 5 };
+    localStorage.setItem('settings', JSON.stringify(settings));
+    window.app.initialize(); // Re-initialize to load the new settings
+    expect(window.app.settings.hskLevel).toBe(5);
+    const hskLevelSelect = document.getElementById('hsk-level');
+    expect(hskLevelSelect.value).toBe('5');
+  });
+
+  test('settings should save HSK level to localStorage when changed', () => {
+    const hskLevelSelect = document.getElementById('hsk-level');
+    hskLevelSelect.value = '4';
+    hskLevelSelect.dispatchEvent(new Event('change'));
+    expect(window.app.settings.hskLevel).toBe(4);
+    const savedSettings = JSON.parse(localStorage.getItem('settings'));
+    expect(savedSettings.hskLevel).toBe(4);
+  });
+
+  test('should toggle the settings panel', () => {
+    const settingsButton = document.getElementById('settings-button');
+    const settingsPanel = document.getElementById('settings-panel');
+    expect(settingsPanel.classList.contains('hidden')).toBe(true);
+    settingsButton.click();
+    expect(settingsPanel.classList.contains('hidden')).toBe(false);
+    settingsButton.click();
+    expect(settingsPanel.classList.contains('hidden')).toBe(true);
+  });
 });

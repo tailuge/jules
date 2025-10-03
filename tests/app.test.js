@@ -1,54 +1,45 @@
-function runTest(testName, testFunction) {
-  const resultsDiv = document.getElementById("results");
-  // Reset the environment before each test
-  localStorage.clear();
-  const textPanel = document.getElementById("text-panel");
-  if (textPanel) {
-    textPanel.innerHTML = "This is where the text to be studied will be displayed.";
-  }
+describe('app', () => {
+  beforeEach(() => {
+    // Reset the environment before each test
+    localStorage.clear();
+    const textPanel = document.getElementById('text-panel');
+    if (textPanel) {
+      textPanel.innerHTML = 'This is where the text to be studied will be displayed.';
+    }
+    // We also need to re-initialize the app before each test to ensure the event listeners are set up.
+    window.app.initialize();
+  });
 
-  try {
-    testFunction();
-    resultsDiv.innerHTML += `<p style="color: green;">✔ ${testName}</p>`;
-  } catch (error) {
-    resultsDiv.innerHTML += `<p style="color: red;">✖ ${testName}: ${error.message}</p>`;
-    console.error(error);
-  }
-}
+  test('it should save text to localStorage', () => {
+    const textPanel = document.getElementById('text-panel');
+    const testText = 'Hello, world!';
+    textPanel.innerHTML = testText;
 
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message || "Assertion failed");
-  }
-}
+    // Directly call the save function
+    window.app.saveText(textPanel);
 
-runTest("it should save text to localStorage", () => {
-  const textPanel = document.getElementById("text-panel");
-  const testText = "Hello, world!";
-  textPanel.innerHTML = testText;
+    expect(localStorage.getItem('textUnderStudy')).toBe(testText);
+  });
 
-  // Directly call the save function
-  window.app.saveText(textPanel);
+  test('it should load text from localStorage', () => {
+    const textPanel = document.getElementById('text-panel');
+    const testText = 'Hello, again!';
+    localStorage.setItem('textUnderStudy', testText);
 
-  assert(
-    localStorage.getItem("textUnderStudy") === testText,
-    "Text was not saved to localStorage"
-  );
+    // Directly call the load function
+    window.app.loadText(textPanel);
+
+    expect(textPanel.innerHTML).toBe(testText);
+  });
+
+  test('it should save text on input', () => {
+    const textPanel = document.getElementById('text-panel');
+    const testText = 'New text';
+    textPanel.innerHTML = testText;
+
+    // Dispatch an input event
+    textPanel.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+
+    expect(localStorage.getItem('textUnderStudy')).toBe(testText);
+  });
 });
-
-runTest("it should load text from localStorage", () => {
-  const textPanel = document.getElementById("text-panel");
-  const testText = "Hello, again!";
-  localStorage.setItem("textUnderStudy", testText);
-
-  // Directly call the load function
-  window.app.loadText(textPanel);
-
-  assert(
-    textPanel.innerHTML === testText,
-    "Text was not loaded from localStorage"
-  );
-});
-
-// Clean up after all tests are done
-localStorage.clear();

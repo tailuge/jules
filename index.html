@@ -10,8 +10,23 @@
     <div class="container">
         <div class="panel top-panel">
             <h1>Text Under Study</h1>
+            <button id="settings-button" class="settings-button">⚙️</button>
             <div id="text-panel" contenteditable="true">
                 This is where the text to be studied will be displayed.
+            </div>
+        </div>
+        <div id="settings-panel" class="settings-panel hidden">
+            <h2>Settings</h2>
+            <div class="setting">
+                <label for="hsk-level">HSK Level:</label>
+                <select id="hsk-level">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
             </div>
         </div>
         <div class="panel bottom-panel">

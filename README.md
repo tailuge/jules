@@ -19,3 +19,18 @@ The main goal of this project is to provide a user interface for studying Chines
 
 - **Formatting:** [Prettier](https://prettier.io/) is used for code formatting to maintain a consistent style.
 - **Testing:** A simple testing harness will be set up for testing the pure JavaScript code.
+
+## Deployment
+
+This project is designed to be deployed using GitHub Pages.
+
+### Steps to Deploy
+
+1.  **Push to GitHub:** Make sure your code is pushed to a GitHub repository.
+2.  **Enable GitHub Pages:**
+    *   Go to your repository's **Settings** tab.
+    *   In the "Code and automation" section of the sidebar, click on **Pages**.
+    *   Under "Build and deployment", for the **Source**, select **Deploy from a branch**.
+    *   Under "Branch", select your main branch (e.g., `main` or `master`) and choose the `/docs` folder.
+    *   Click **Save**.
+3.  **Access Your Site:** Your site will be available at `https://[username].github.io/[repository]/`. You will need to replace `[username]` with your GitHub username and `[repository]` with your repository name.

@@ -2,11 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 // Load the app's HTML structure
-const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+const html = fs.readFileSync(path.resolve(__dirname, '../docs/index.html'), 'utf8');
 document.body.innerHTML = html;
 
 // Load the app's JavaScript
-const appScriptPath = path.resolve(__dirname, '../assets/js/app.js');
+const appScriptPath = path.resolve(__dirname, '../docs/assets/js/app.js');
 const appScript = fs.readFileSync(appScriptPath, 'utf8');
 
 // The script is expect to be in a browser, so we need to

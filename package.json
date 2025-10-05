@@ -4,14 +4,19 @@
   "description": "A pure JavaScript and HTML project for studying Traditional Chinese.",
   "main": "index.html",
   "scripts": {
-    "start": "http-server .",
-    "test": "jest",
-    "format": "prettier --write \"**/*.{html,js}\""
+    "start": "npm run build && http-server .",
+    "test": "npm run build && jest",
+    "build": "tsc",
+    "format": "prettier --write \"**/*.{html,js,ts}\""
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/jsdom": "^27.0.0",
     "http-server": "^14.1.1",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.4.4",
+    "typescript": "^5.9.3"
   }
 }

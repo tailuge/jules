@@ -11,7 +11,7 @@ describe('app', () => {
   });
 
   test('it should save text to localStorage', () => {
-    const textPanel = document.getElementById('text-panel');
+    const textPanel = document.getElementById('text-panel') as HTMLElement;
     const testText = 'Hello, world!';
     textPanel.innerHTML = testText;
 
@@ -22,7 +22,7 @@ describe('app', () => {
   });
 
   test('it should load text from localStorage', () => {
-    const textPanel = document.getElementById('text-panel');
+    const textPanel = document.getElementById('text-panel') as HTMLElement;
     const testText = 'Hello, again!';
     localStorage.setItem('textUnderStudy', testText);
 
@@ -33,7 +33,7 @@ describe('app', () => {
   });
 
   test('it should save text on input', () => {
-    const textPanel = document.getElementById('text-panel');
+    const textPanel = document.getElementById('text-panel') as HTMLElement;
     const testText = 'New text';
     textPanel.innerHTML = testText;
 
@@ -54,22 +54,22 @@ describe('app', () => {
     localStorage.setItem('settings', JSON.stringify(settings));
     window.app.initialize(); // Re-initialize to load the new settings
     expect(window.app.settings.hskLevel).toBe(5);
-    const hskLevelSelect = document.getElementById('hsk-level');
+    const hskLevelSelect = document.getElementById('hsk-level') as HTMLSelectElement;
     expect(hskLevelSelect.value).toBe('5');
   });
 
   test('settings should save HSK level to localStorage when changed', () => {
-    const hskLevelSelect = document.getElementById('hsk-level');
+    const hskLevelSelect = document.getElementById('hsk-level') as HTMLSelectElement;
     hskLevelSelect.value = '4';
     hskLevelSelect.dispatchEvent(new Event('change'));
     expect(window.app.settings.hskLevel).toBe(4);
-    const savedSettings = JSON.parse(localStorage.getItem('settings'));
+    const savedSettings = JSON.parse(localStorage.getItem('settings')!);
     expect(savedSettings.hskLevel).toBe(4);
   });
 
   test('should toggle the settings panel', () => {
-    const settingsButton = document.getElementById('settings-button');
-    const settingsPanel = document.getElementById('settings-panel');
+    const settingsButton = document.getElementById('settings-button') as HTMLElement;
+    const settingsPanel = document.getElementById('settings-panel') as HTMLElement;
     expect(settingsPanel.classList.contains('hidden')).toBe(true);
     settingsButton.click();
     expect(settingsPanel.classList.contains('hidden')).toBe(false);

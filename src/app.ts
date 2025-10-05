@@ -1,24 +1,24 @@
 window.app = {
   settings: {
     hskLevel: 3,
-    load: function () {
+    load: function (): void {
       const savedSettings = localStorage.getItem("settings");
       if (savedSettings) {
         Object.assign(this, JSON.parse(savedSettings));
       }
     },
-    save: function () {
+    save: function (): void {
       localStorage.setItem("settings", JSON.stringify(this));
     },
   },
 
-  saveText: function (element) {
+  saveText: function (element: HTMLElement | null): void {
     if (element) {
       localStorage.setItem("textUnderStudy", element.innerHTML);
     }
   },
 
-  loadText: function (element) {
+  loadText: function (element: HTMLElement | null): void {
     if (element) {
       const savedText = localStorage.getItem("textUnderStudy");
       if (savedText) {
@@ -27,7 +27,7 @@ window.app = {
     }
   },
 
-  initialize: function () {
+  initialize: function (): void {
     this.settings.load();
 
     const textPanel = document.getElementById("text-panel");
@@ -38,7 +38,7 @@ window.app = {
 
     const settingsButton = document.getElementById("settings-button");
     const settingsPanel = document.getElementById("settings-panel");
-    const hskLevelSelect = document.getElementById("hsk-level");
+    const hskLevelSelect = document.getElementById("hsk-level") as HTMLSelectElement | null;
 
     if (settingsButton && settingsPanel) {
       settingsButton.addEventListener("click", () => {
@@ -47,9 +47,10 @@ window.app = {
     }
 
     if (hskLevelSelect) {
-      hskLevelSelect.value = this.settings.hskLevel;
-      hskLevelSelect.addEventListener("change", (event) => {
-        this.settings.hskLevel = parseInt(event.target.value, 10);
+      hskLevelSelect.value = this.settings.hskLevel.toString();
+      hskLevelSelect.addEventListener("change", (event: Event) => {
+        const target = event.target as HTMLSelectElement;
+        this.settings.hskLevel = parseInt(target.value, 10);
         this.settings.save();
       });
     }

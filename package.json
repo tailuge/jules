@@ -7,9 +7,9 @@
     "node": "24"
   },
   "scripts": {
-    "start": "npm run build && http-server .",
-    "test": "npm run build && jest",
-    "build": "tsc",
+    "start": "vite",
+    "test": "jest",
+    "build": "vite build",
     "format": "prettier --write \"**/*.{html,js,ts}\""
   },
   "devDependencies": {
@@ -20,6 +20,7 @@
     "jest-environment-jsdom": "^30.2.0",
     "prettier": "^3.0.0",
     "ts-jest": "^29.4.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9"
   }
 }

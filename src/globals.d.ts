@@ -1,5 +1,6 @@
 interface AppSettings {
   hskLevel: number;
+  llmPrompt: string;
   load: () => void;
   save: () => void;
 }

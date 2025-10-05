@@ -1,6 +1,7 @@
 window.app = {
   settings: {
     hskLevel: 3,
+    llmPrompt: "",
     load: function (): void {
       const savedSettings = localStorage.getItem("settings");
       if (savedSettings) {
@@ -39,10 +40,18 @@ window.app = {
     const settingsButton = document.getElementById("settings-button");
     const settingsPanel = document.getElementById("settings-panel");
     const hskLevelSelect = document.getElementById("hsk-level") as HTMLSelectElement | null;
+    const llmPromptTextarea = document.getElementById("llm-prompt") as HTMLTextAreaElement | null;
+    const doneButton = document.getElementById("done-button");
 
     if (settingsButton && settingsPanel) {
       settingsButton.addEventListener("click", () => {
         settingsPanel.classList.toggle("hidden");
+      });
+    }
+
+    if (doneButton && settingsPanel) {
+      doneButton.addEventListener("click", () => {
+        settingsPanel.classList.add("hidden");
       });
     }
 
@@ -51,6 +60,15 @@ window.app = {
       hskLevelSelect.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLSelectElement;
         this.settings.hskLevel = parseInt(target.value, 10);
+        this.settings.save();
+      });
+    }
+
+    if (llmPromptTextarea) {
+      llmPromptTextarea.value = this.settings.llmPrompt;
+      llmPromptTextarea.addEventListener("input", (event: Event) => {
+        const target = event.target as HTMLTextAreaElement;
+        this.settings.llmPrompt = target.value;
         this.settings.save();
       });
     }

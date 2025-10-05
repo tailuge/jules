@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Load the app's HTML structure
 const html = fs.readFileSync(path.resolve(__dirname, '../docs/index.html'), 'utf8');

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A pure JavaScript and HTML project for studying Traditional Chinese.",
   "main": "index.html",
+  "engines": {
+    "node": "24"
+  },
   "scripts": {
     "start": "npm run build && http-server .",
     "test": "npm run build && jest",

@@ -33,4 +33,4 @@ This project is designed to be deployed using GitHub Pages.
     *   Under "Build and deployment", for the **Source**, select **Deploy from a branch**.
     *   Under "Branch", select your main branch (e.g., `main` or `master`) and choose the `/docs` folder.
     *   Click **Save**.
-3.  **Access Your Site:** Your site will be available at `https://[username].github.io/[repository]/`. You will need to replace `[username]` with your GitHub username and `[repository]` with your repository name.
+3.  **Access Your Site:** Your site will be available at `https://tailuge.github.io/jules/`.

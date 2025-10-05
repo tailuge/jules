@@ -2,7 +2,7 @@
 /node_modules
 
 # Build output
-/docs/assets/js/app.js
+/dist
 
 # Logs
 npm-debug.log*

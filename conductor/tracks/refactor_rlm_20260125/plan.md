@@ -5,9 +5,9 @@
 - [x] Task: Implement LLM adapter using Simon Willison's `llm` package 81e2887
     - [x] Write integration test for llm adapter
     - [x] Implement `src/llm_adapter.sh`
-- [ ] Task: Implement modular tool definitions
-    - [ ] Write tests for shell tool wrappers
-    - [ ] Implement `src/tools.sh`
+- [x] Task: Implement modular tool definitions 40083a9
+    - [x] Write tests for shell tool wrappers
+    - [x] Implement `src/tools.sh`
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation and Tooling' (Protocol in workflow.md)
 
 ## Phase 2: Core Logic and Modularization

@@ -10,14 +10,14 @@
     - [x] Implement `src/tools.sh`
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation and Tooling' (Protocol in workflow.md) c8f0762
 
-## Phase 2: Core Logic and Modularization
+## Phase 2: Core Logic and Modularization [checkpoint: 9a389b2]
 - [x] Task: Extract and externalize prompts 2b0d692
     - [x] Create system prompts in `prompts/`
 - [x] Task: Implement modular core loop 3fef9d4
     - [x] Write integration test for the full loop
     - [x] Implement `src/core.sh`
 - [x] Task: Refactor `rlm.sh` to use modular components 78cd6a6
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Logic and Modularization' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Logic and Modularization' (Protocol in workflow.md) 9a389b2
 
 ## Phase 3: Final Integration and Cleanup
 - [ ] Task: Verify recursive sub-calls in the modular architecture

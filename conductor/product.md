@@ -14,9 +14,10 @@ D research how rlm works
 
 ## Key Features
 - **Minimal Bash Harness:** A simple, readable shell script that implements the RLM loop.
-- **LLM Interoperability:** Uses Simon Willison's `llm` package to easily switch between different LLM providers and models.
+- **LLM Interoperability:** Standardized integration with Simon Willison's `llm` package via a dedicated adapter.
 - **Recursive Sub-calls:** Supports recursive nesting, where the root model can initiate sub-calls that are themselves instances of the RLM loop.
-- **Shell-based Toolbox:** Provides the LLM with standard GNU/Linux utilities (`grep`, `head`, `tail`, `sed`) to interact with the context environment.
+- **Modular Architecture:** Core logic, LLM interfacing, and shell tool definitions are decoupled into separate modules.
+- **Externalized Prompts:** System prompts and instruction templates are stored in a dedicated `prompts/` directory for easier iteration.
 - **State Management:** Maintains a REPL-like history of shell command outputs to provide context for the next iteration of the loop.
 
 ## Success Criteria

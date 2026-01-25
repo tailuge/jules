@@ -4,7 +4,8 @@
 # Usage: ./rlm.sh "Your initial task description"
 
 # --- Source Modular Components ---
-SOURCE_DIR="src"
+export SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_DIR="$SCRIPT_DIR/src"
 if [ ! -d "$SOURCE_DIR" ]; then
     echo "Error: Source directory '$SOURCE_DIR' missing."
     exit 1
@@ -17,16 +18,51 @@ source "$SOURCE_DIR/tools.sh"
 # shellcheck source=src/core.sh
 source "$SOURCE_DIR/core.sh"
 
-# --- Configuration ---
-CONTEXT_FILE="${2:-context.md}"
+# --- Initialization ---
+MODEL=""
+CONTEXT_FILE="context.md"
 MAX_ITERATIONS=10
 
-# --- Initialization ---
-PROMPT=$1
+usage() {
+    echo "Usage: $0 [options] <prompt>"
+    echo ""
+    echo "Options:"
+    echo "  -m, --model <model>    Specify the LLM model to use (e.g., gemini-preview)"
+    echo "  -c, --context <file>   Specify the context file (default: context.md)"
+    echo "  -h, --help             Show this help message"
+    exit 0
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -m|--model)
+            MODEL="$2"
+            shift 2
+            ;;
+        -c|--context)
+            CONTEXT_FILE="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            ;;
+        -*)
+            echo "Unknown option: $1"
+            usage
+            ;;
+        *)
+            PROMPT="$1"
+            shift
+            ;;
+    esac
+done
+
 if [ -z "$PROMPT" ]; then
-    echo "Usage: $0 <prompt>"
-    exit 1
+    usage
 fi
+
+# Export MODEL for use in other scripts
+export LLM_MODEL="$MODEL"
 
 # Verify dependencies
 check_llm_dependency || exit 1

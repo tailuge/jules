@@ -7,7 +7,7 @@ run_rlm_loop() {
     local max_iterations="${2:-10}"
     local iteration=0
     
-    local system_prompt_file="prompts/system_prompt.txt"
+    local system_prompt_file="${SCRIPT_DIR:-.}/prompts/system_prompt.txt"
     if [ ! -f "$system_prompt_file" ]; then
         echo "Error: System prompt file missing at $system_prompt_file" >&2
         return 1
@@ -22,7 +22,14 @@ run_rlm_loop() {
         # 1. Get LLM response
         # Using a fixed context window for simplicity in this version
         local response
-        response=$(tail -n 50 "$context_file" | llm prompt -s "$system_prompt")
+        response=$(tail -n 50 "$context_file" | llm_prompt_with_system "$system_prompt")
+        local llm_exit_code=$?
+
+        if [ $llm_exit_code -ne 0 ]; then
+            echo "Error: LLM generation failed. Aborting iteration."
+            echo "Error: LLM generation failed." >> "$context_file"
+            break
+        fi
         
         echo "$response" >> "$context_file"
 

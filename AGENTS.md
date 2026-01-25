@@ -1,3 +1,4 @@
+
 Before committing, run ./test.sh to check for lint errors.
 
 Shell scripting — quick tips and best practices
@@ -32,54 +33,3 @@ Shell scripting — quick tips and best practices
 - Make scripts executable and include a -h/--help usage text.
 - Use CI checks to run shellcheck, shfmt, and bash -n on changed scripts before merging.
 
-Minimal script template
-
-#!/usr/bin/env bash
-set -euo pipefail
-IFS=$'\n\t'
-
-usage() {
-  cat <<EOF
-Usage: $(basename "$0") [-h] -f <file>
-EOF
-}
-
-cleanup() {
-  # remove temp files, etc.
-  :
-}
-
-trap 'rc=$?; cleanup; [ $rc -ne 0 ] && echo "Failed on line $LINENO"; exit $rc' EXIT
-
-main() {
-  local file=""
-  while getopts ":hf:" opt; do
-    case $opt in
-      h) usage; exit 0 ;;
-      f) file=$OPTARG ;;
-      \?) printf 'Invalid option: -%s\n' "$OPTARG"; usage; exit 2 ;;
-      :) printf 'Option -%s requires an argument.\n' "$OPTARG"; usage; exit 2 ;;
-    esac
-  done
-  shift $((OPTIND - 1))
-
-  printf 'Processing %s\n' "${file:-<none>}"
-}
-
-main "$@"
-
-Example test.sh (basic lint/run checks)
-
-#!/usr/bin/env bash
-set -euo pipefail
-IFS=$'\n\t'
-
-# Run shellcheck/shfmt and syntax checks on tracked .sh files
-FILES=$(git ls-files '*.sh' || true)
-if [ -n "$FILES" ]; then
-  shellcheck $FILES || true
-  shfmt -l $FILES || true
-  for f in $FILES; do
-    bash -n "$f"
-  done
-fi

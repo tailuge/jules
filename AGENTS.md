@@ -1,7 +1,12 @@
+# Testing
 
-Before committing, run ./test.sh to check for lint errors.
+To run the project tests, execute the test script from the root directory:
 
-Shell scripting — quick tips and best practices
+```bash
+./tests/test.sh
+```
+
+## Shell scripting — quick tips and best practices
 
 - Use a portable shebang:
   - #!/usr/bin/env bash

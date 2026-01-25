@@ -2,9 +2,9 @@
 
 ## Phase 1: Foundation and Tooling
 - [x] Task: Create project structure (`src/`, `prompts/`) ddf6bd4
-- [ ] Task: Implement LLM adapter using Simon Willison's `llm` package
-    - [ ] Write integration test for llm adapter
-    - [ ] Implement `src/llm_adapter.sh`
+- [x] Task: Implement LLM adapter using Simon Willison's `llm` package 81e2887
+    - [x] Write integration test for llm adapter
+    - [x] Implement `src/llm_adapter.sh`
 - [ ] Task: Implement modular tool definitions
     - [ ] Write tests for shell tool wrappers
     - [ ] Implement `src/tools.sh`

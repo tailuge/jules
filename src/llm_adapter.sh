@@ -1,6 +1,9 @@
 #!/bin/bash
 # src/llm_adapter.sh
 
+# Define log file location
+LLM_LOG_FILE="${LLM_LOG_FILE:-/tmp/jules_llm.log}"
+
 # Function to check for dependencies
 check_llm_dependency() {
     if [ "${MOCK:-0}" = "1" ]; then
@@ -26,6 +29,13 @@ if [ "${MOCK:-0}" = "1" ] || [ "$(type -t llm)" != "function" ]; then
     }
 fi
 
+# Helper function to log LLM invocations
+log_llm_invocation() {
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] $*" >> "$LLM_LOG_FILE"
+}
+
 # Core function to query the LLM
 llm_query() {
     local prompt="$1"
@@ -34,9 +44,11 @@ llm_query() {
     check_llm_dependency || return 1
     
     if [ -n "$model" ]; then
-        llm prompt "$prompt" -m "$model"
+        log_llm_invocation "llm -m \"$model\" \"$prompt\""
+        llm -m "$model" "$prompt"
     else
-        llm prompt "$prompt"
+        log_llm_invocation "llm \"$prompt\""
+        llm "$prompt"
     fi
 }
 
@@ -52,10 +64,12 @@ llm_prompt_with_system() {
     local exit_code=0
 
     if [ -n "$model" ]; then
-        llm prompt -s "$system_prompt" -m "$model" 2> "$stderr_temp"
+        log_llm_invocation "llm -m \"$model\" -s \"$system_prompt\" (input from stdin)"
+        llm -m "$model" -s "$system_prompt" 2> "$stderr_temp"
         exit_code=$?
     else
-        llm prompt -s "$system_prompt" 2> "$stderr_temp"
+        log_llm_invocation "llm -s \"$system_prompt\" (input from stdin)"
+        llm -s "$system_prompt" 2> "$stderr_temp"
         exit_code=$?
     fi
 

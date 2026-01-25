@@ -1,6 +1,6 @@
 # Implementation Plan: Modular RLM Harness
 
-## Phase 1: Foundation and Tooling
+## Phase 1: Foundation and Tooling [checkpoint: c8f0762]
 - [x] Task: Create project structure (`src/`, `prompts/`) ddf6bd4
 - [x] Task: Implement LLM adapter using Simon Willison's `llm` package 81e2887
     - [x] Write integration test for llm adapter
@@ -8,7 +8,7 @@
 - [x] Task: Implement modular tool definitions 40083a9
     - [x] Write tests for shell tool wrappers
     - [x] Implement `src/tools.sh`
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation and Tooling' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation and Tooling' (Protocol in workflow.md) c8f0762
 
 ## Phase 2: Core Logic and Modularization
 - [ ] Task: Extract and externalize prompts

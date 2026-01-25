@@ -15,7 +15,7 @@ source "$SOURCE_DIR/tools.sh"
 source "$SOURCE_DIR/core.sh"
 
 # --- Configuration ---
-CONTEXT_FILE="context.md"
+CONTEXT_FILE="${2:-context.md}"
 MAX_ITERATIONS=10
 
 # --- Initialization ---

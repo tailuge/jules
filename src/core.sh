@@ -12,21 +12,25 @@ run_rlm_loop() {
         echo "Error: System prompt file missing at $system_prompt_file" >&2
         return 1
     fi
-    local system_prompt=$(cat "$system_prompt_file")
+    local system_prompt
+    system_prompt=$(cat "$system_prompt_file")
 
-    while [ $iteration -lt $max_iterations ]; do
+    while [ "$iteration" -lt "$max_iterations" ]; do
         ((iteration++))
         echo "--- Iteration $iteration ---"
 
         # 1. Get LLM response
         # Using a fixed context window for simplicity in this version
-        local response=$(tail -n 50 "$context_file" | llm prompt -s "$system_prompt")
+        local response
+        response=$(tail -n 50 "$context_file" | llm prompt -s "$system_prompt")
         
         echo "$response" >> "$context_file"
 
         # 2. Parse Thought and Action
-        local thought=$(echo "$response" | grep "THOUGHT:" | head -n 1 | sed 's/.*THOUGHT: //')
-        local action=$(echo "$response" | grep "ACTION:" | head -n 1 | sed 's/.*ACTION: //')
+        local thought
+        thought=$(echo "$response" | grep "THOUGHT:" | head -n 1 | sed 's/.*THOUGHT: //')
+        local action
+        action=$(echo "$response" | grep "ACTION:" | head -n 1 | sed 's/.*ACTION: //')
 
         echo "LLM THOUGHT: $thought"
         echo "LLM ACTION: $action"
@@ -42,7 +46,8 @@ run_rlm_loop() {
             echo "Executing: $action"
             # In modular version, we assume tools are sourced or in path.
             # We use eval for now as per original rlm.sh but aware of safety TODO.
-            local observation=$(eval "$action" 2>&1)
+            local observation
+            observation=$(eval "$action" 2>&1)
             echo "OBSERVATION: $observation" >> "$context_file"
         else
             echo "No action found in LLM response."

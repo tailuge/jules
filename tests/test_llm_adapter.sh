@@ -2,6 +2,7 @@
 # tests/test_llm_adapter.sh
 
 # Source the file under test
+# shellcheck source=src/llm_adapter.sh
 if [ -f "src/llm_adapter.sh" ]; then
     source src/llm_adapter.sh
 else
@@ -15,6 +16,7 @@ echo "Testing llm_query function..."
 # For this test, we want to see if llm_query calls 'llm' correctly.
 # We can mock it by creating a function in this test script.
 
+# shellcheck disable=SC2329
 llm() {
     echo "MOCK_RESPONSE: Received prompt: $*"
 }

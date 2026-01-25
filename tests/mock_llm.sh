@@ -9,7 +9,7 @@ if [[ "$INPUT" == *"OBSERVATION: "*"version"* || "$INPUT" == *"OBSERVATION:  "*"
   echo "ACTION: exit"
 elif [[ "$INPUT" == *"OBSERVATION: {"* ]]; then
   echo "THOUGHT: I have read the package.json. Now I will search for the version."
-  echo "ACTION: grep '"version"' package.json"
+  echo "ACTION: grep 'version' package.json"
 elif [[ "$INPUT" == *"Find the version in package.json"* ]]; then
   echo "THOUGHT: I see a reference to package.json. I will check its content."
   echo "ACTION: cat package.json"

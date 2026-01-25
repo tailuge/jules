@@ -1,6 +1,7 @@
 #!/bin/bash
 # tests/test_tools.sh
 
+# shellcheck source=src/tools.sh
 if [ -f "src/tools.sh" ]; then
     source src/tools.sh
 else

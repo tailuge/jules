@@ -10,8 +10,11 @@ if [ ! -d "$SOURCE_DIR" ]; then
     exit 1
 fi
 
+# shellcheck source=src/llm_adapter.sh
 source "$SOURCE_DIR/llm_adapter.sh"
+# shellcheck source=src/tools.sh
 source "$SOURCE_DIR/tools.sh"
+# shellcheck source=src/core.sh
 source "$SOURCE_DIR/core.sh"
 
 # --- Configuration ---

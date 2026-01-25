@@ -7,6 +7,7 @@ CONTEXT_FILE="tests/tmp/test_context.md"
 rm -f "$CONTEXT_FILE"
 
 # Mock the 'llm' command
+# shellcheck disable=SC2329
 llm() {
     # Simulate a two-step process: first, grep, then exit.
     if ! grep -q "ACTION: grep" "$CONTEXT_FILE"; then
@@ -29,8 +30,11 @@ echo "Testing modular core loop..."
 
 # Run core loop with a small max iterations
 # We'll need to pass the context file and other params
+# shellcheck source=src/llm_adapter.sh
 source src/llm_adapter.sh
+# shellcheck source=src/tools.sh
 source src/tools.sh
+# shellcheck source=src/core.sh
 source src/core.sh
 
 # Initial prompt

@@ -2,6 +2,7 @@
 # tests/test_final_e2e.sh
 
 # Mock the 'llm' command
+# shellcheck disable=SC2329
 llm() {
     if ! grep -q "OBSERVATION:" context_final.md; then
         echo "THOUGHT: I need to read the test context. ACTION: grep -E 'RLM_TEST_STRING' tests/context.md"

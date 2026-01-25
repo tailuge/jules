@@ -16,7 +16,7 @@
 - [x] Task: Implement modular core loop 3fef9d4
     - [x] Write integration test for the full loop
     - [x] Implement `src/core.sh`
-- [ ] Task: Refactor `rlm.sh` to use modular components
+- [x] Task: Refactor `rlm.sh` to use modular components 78cd6a6
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Logic and Modularization' (Protocol in workflow.md)
 
 ## Phase 3: Final Integration and Cleanup

@@ -38,3 +38,6 @@ To run the project tests, execute the test script from the root directory:
 - Make scripts executable and include a -h/--help usage text.
 - Use CI checks to run shellcheck, shfmt, and bash -n on changed scripts before merging.
 
+# Project
+
+Heavy use of gemini-cli and /conductor

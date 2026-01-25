@@ -2,6 +2,7 @@
 # tests/test_rlm_e2e.sh
 
 # Mock the 'llm' command
+# shellcheck disable=SC2329
 llm() {
     echo "THOUGHT: I am testing. ACTION: echo 'SUCCESS'"
     echo "THOUGHT: Done. ACTION: exit"

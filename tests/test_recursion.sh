@@ -2,6 +2,7 @@
 # tests/test_recursion.sh
 
 # Mock the 'llm' command to perform a recursive call
+# shellcheck disable=SC2329
 llm() {
     # If this is the root call
     if ! grep -q "RECURSIVE_CALL" context_recursive.md; then

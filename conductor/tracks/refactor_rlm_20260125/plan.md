@@ -11,8 +11,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation and Tooling' (Protocol in workflow.md) c8f0762
 
 ## Phase 2: Core Logic and Modularization
-- [ ] Task: Extract and externalize prompts
-    - [ ] Create system prompts in `prompts/`
+- [x] Task: Extract and externalize prompts 2b0d692
+    - [x] Create system prompts in `prompts/`
 - [ ] Task: Implement modular core loop
     - [ ] Write integration test for the full loop
     - [ ] Implement `src/core.sh`

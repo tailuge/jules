@@ -4,7 +4,8 @@
 # Usage: ./rlm.sh "Your initial task description"
 
 # --- Source Modular Components ---
-export SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export SCRIPT_DIR
 SOURCE_DIR="$SCRIPT_DIR/src"
 if [ ! -d "$SOURCE_DIR" ]; then
     echo "Error: Source directory '$SOURCE_DIR' missing."

@@ -20,6 +20,6 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Logic and Modularization' (Protocol in workflow.md) 9a389b2
 
 ## Phase 3: Final Integration and Cleanup
-- [ ] Task: Verify recursive sub-calls in the modular architecture
+- [x] Task: Verify recursive sub-calls in the modular architecture 805654f
 - [ ] Task: Final end-to-end testing against `tests/context.md`
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Final Integration and Cleanup' (Protocol in workflow.md)

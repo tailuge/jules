@@ -13,9 +13,9 @@
 ## Phase 2: Core Logic and Modularization
 - [x] Task: Extract and externalize prompts 2b0d692
     - [x] Create system prompts in `prompts/`
-- [ ] Task: Implement modular core loop
-    - [ ] Write integration test for the full loop
-    - [ ] Implement `src/core.sh`
+- [x] Task: Implement modular core loop 3fef9d4
+    - [x] Write integration test for the full loop
+    - [x] Implement `src/core.sh`
 - [ ] Task: Refactor `rlm.sh` to use modular components
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Logic and Modularization' (Protocol in workflow.md)
 

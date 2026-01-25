@@ -33,6 +33,11 @@ fi
 log_llm_invocation() {
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    case "$1" in
+        --invoke--*|--response--*)
+            echo "" >> "$LLM_LOG_FILE"
+            ;;
+    esac
     echo "[$timestamp] $*" >> "$LLM_LOG_FILE"
 }
 
@@ -43,13 +48,26 @@ llm_query() {
     
     check_llm_dependency || return 1
     
+    local output_temp
+    output_temp=$(mktemp)
+    local exit_code=0
+    
     if [ -n "$model" ]; then
-        log_llm_invocation "llm -m \"$model\" \"$prompt\""
-        llm -m "$model" "$prompt"
+        log_llm_invocation "--invoke-- llm -m \"$model\" \"$prompt\""
+        llm -m "$model" "$prompt" > "$output_temp" 2> /dev/null
+        exit_code=$?
     else
-        log_llm_invocation "llm \"$prompt\""
-        llm "$prompt"
+        log_llm_invocation "--invoke-- llm \"$prompt\""
+        llm "$prompt" > "$output_temp" 2> /dev/null
+        exit_code=$?
     fi
+
+    log_llm_invocation "--response--"
+    cat "$output_temp" >> "$LLM_LOG_FILE"
+    cat "$output_temp"
+    rm "$output_temp"
+
+    return $exit_code
 }
 
 # Function to run llm prompt with a system prompt, supporting piped input
@@ -61,24 +79,32 @@ llm_prompt_with_system() {
 
     local stderr_temp
     stderr_temp=$(mktemp)
+    local output_temp
+    output_temp=$(mktemp)
     local exit_code=0
 
     if [ -n "$model" ]; then
-        log_llm_invocation "llm -m \"$model\" -s \"$system_prompt\" (input from stdin)"
-        llm -m "$model" -s "$system_prompt" 2> "$stderr_temp"
+        log_llm_invocation "--invoke-- llm -m \"$model\" -s \"$system_prompt\" (input from stdin)"
+        llm -m "$model" -s "$system_prompt" > "$output_temp" 2> "$stderr_temp"
         exit_code=$?
     else
-        log_llm_invocation "llm -s \"$system_prompt\" (input from stdin)"
-        llm -s "$system_prompt" 2> "$stderr_temp"
+        log_llm_invocation "--invoke-- llm -s \"$system_prompt\" (input from stdin)"
+        llm -s "$system_prompt" > "$output_temp" 2> "$stderr_temp"
         exit_code=$?
     fi
+    
+    log_llm_invocation "--response--"
+    cat "$output_temp" >> "$LLM_LOG_FILE"
+    cat "$output_temp"
 
     if [ $exit_code -ne 0 ]; then
         echo "[RLM] LLM ERROR (Exit Code $exit_code):" >&2
         sed 's/^/  /' "$stderr_temp" >&2
         rm "$stderr_temp"
+        rm "$output_temp"
         return $exit_code
     fi
 
     rm "$stderr_temp"
+    rm "$output_temp"
 }

@@ -68,6 +68,9 @@ export LLM_MODEL="$MODEL"
 # Verify dependencies
 check_llm_dependency || exit 1
 
+# Clear the log file for this session
+: > "$LLM_LOG_FILE"
+
 echo "TASK: $PROMPT" > "$CONTEXT_FILE"
 echo "Starting RLM loop for task: $PROMPT"
 

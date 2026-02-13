@@ -14,6 +14,7 @@
     "build": "bun build ./src/index.tsx --compile --outfile dist/tailuge",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
+    "test": "bun test",
     "format": "prettier --write src"
   },
   "engines": {

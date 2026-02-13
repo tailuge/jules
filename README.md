@@ -1,17 +1,149 @@
-# recursive llm harness
+# TUI Agent CLI
 
+A minimal, lightweight TypeScript TUI (Terminal User Interface) project for building AI agents with agentic loop capabilities.
 
-**Recursive Language Model (RLM)**
-you should focus on the core architectural requirements identified in the sources: a persistent environment, programmatic tools to "peek" at context, and a loop for recursive sub-calls [1-3].Below is a structured prompt you can use to generate this shell script harness.### Recommended Prompt for Generating the Harness
+## 📥 Download
 
-**Role:** Act as a Systems Architect and Bash scripting expert. 
+**[Download ZIP](download.zip)** - Get the complete project ready to use.
 
-**Objective:** Create a minimal shell script harness that implements a 
+After downloading:
+```bash
+unzip download.zip
+cd tui-agent-project
+bun install
+bun run dev
+```
 
-**Recursive Language Model (RLM)** loop as described in the Zhang et al. paper. The harness should treat a large text file as an **external environment** rather than a direct prompt input [4-6].**Requirements for the Script:**1.  **Environment Initialization:** Load a large text file (the "context") into a path variable. The root model should never see the full content of this file in its initial prompt [2].2.  **The RLM Loop:** Implement a `while` loop that continues until the model outputs a `FINAL(answer)` or `FINAL_VAR(variable_name)` tag [7, 8].3.  **Tool Definitions:** Provide the LLM with a "toolbox" of shell-based commands to interact with the context file, specifically:    *   **Peeking:** Using `head`, `tail`, or `sed` to view specific lines [9, 10].    *   **Grepping:** Using `grep -E` for regex searches to narrow down relevant information [10, 11].    *   **Partitioning:** A way to split the file into smaller temporary chunks [11].    *   **Sub-calls:** A function `llm_query` that sends a small snippet of text to a cheaper/smaller sub-model instance (e.g., via a `curl` command to an OAI-compatible API) [2, 12].4.  
+---
 
-**State Management:** Maintain a history of "REPL" outputs (the results of the shell commands) so the root model can see the results of its previous "peeks" or "greps" [1, 3].5.  **Execution Logic:** The script must extract blocks of code wrapped in triple backticks from the LLM’s response, execute them in the shell, and feed the `stdout` back into the next iteration of the loop [3, 8].
+## Features
 
-**Output:** Provide a clean, commented `.sh` file that uses `curl` for the LLM API calls and standard GNU/Linux utilities for context manipulation.---### Key Concepts to Include in Your Harness (Based on the Sources)To ensure the generated script functions as a true RLM, the sources suggest these specific implementation details:*   **Handle Context as a Variable:** In a shell script, your "variable" will likely be a file path. The root model should be prompted with the file's size and structure (e.g., line count) but not the content itself [13, 14].*   
+- 🖥️ **Rich TUI** - Built with OpenTUI for beautiful terminal interfaces
+- 🤖 **Agentic Loop** - ReAct-style reasoning and action execution
+- 🔌 **Multi-Provider** - Support for Anthropic, OpenAI, Google, Groq, Mistral, and custom endpoints
+- 🛠️ **Tool System** - Built-in tools for shell, files, and more
+- ⚡ **Bun Runtime** - Fast startup and execution
+- 📦 **Minimal Dependencies** - Only what you need
 
-**Decomposition Strategy:** The harness must allow the model to follow a "Partition + Map" strategy, where it breaks the file into chunks and calls the sub-model for each chunk before aggregating the results [11].*   **Termination Mechanism:** The sources emphasize the use of specific tags like `FINAL()` to break the loop once the model is confident in its answer [7, 15].*   **Cost Efficiency:** Using a shell script as a "control plane" allows you to use a very small, cheap model (like GPT-5-mini or Qwen-7B) to do the heavy lifting of scanning the context, which significantly reduces API costs [16, 17].*   **Recursive Depth:** While the script can support any depth, the sources suggest starting with a **depth of 1** (the root model calls a sub-model that does not perform further recursion) to manage complexity [18, 19].
+## Quick Start
+
+```bash
+# Clone and install
+cd tui-agent-project
+bun install
+
+# Set your API key
+export ANTHROPIC_API_KEY=your-key
+
+# Run
+bun run dev
+```
+
+## Configuration
+
+Create `~/.tui-agent/config.json`:
+
+```json
+{
+  "model": {
+    "provider": "anthropic",
+    "name": "claude-sonnet-4-20250514"
+  },
+  "agent": {
+    "maxIterations": 10,
+    "systemPrompt": "You are a helpful coding assistant."
+  },
+  "tools": {
+    "enabled": ["shell", "read_file", "write_file", "list_dir"]
+  },
+  "tui": {
+    "theme": "dark",
+    "showTokenCount": true
+  }
+}
+```
+
+## Supported Providers
+
+| Provider | Package | Default Model |
+|----------|---------|---------------|
+| Anthropic | `@ai-sdk/anthropic` | claude-sonnet-4-20250514 |
+| OpenAI | `@ai-sdk/openai` | gpt-4o |
+| Google | `@ai-sdk/google` | gemini-2.0-flash |
+| Groq | `@ai-sdk/groq` | llama-3.3-70b-versatile |
+| Mistral | `@ai-sdk/mistral` | mistral-large-latest |
+| Custom | `@ai-sdk/openai-compatible` | (configurable) |
+
+## Project Structure
+
+```
+src/
+├── index.ts          # Main entry point
+├── agent/
+│   ├── loop.ts       # Agentic loop implementation
+│   └── provider.ts   # LLM provider abstraction
+├── tools/
+│   ├── registry.ts   # Tool management
+│   ├── shell.ts      # Shell execution
+│   └── file.ts       # File operations
+├── config/
+│   ├── schema.ts     # Config validation
+│   └── loader.ts     # Config loading
+└── utils/
+    └── logger.ts     # Logging utilities
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google API key |
+| `GROQ_API_KEY` | Groq API key |
+| `MISTRAL_API_KEY` | Mistral API key |
+| `TUI_AGENT_PROVIDER` | Override provider |
+| `TUI_AGENT_MODEL` | Override model name |
+
+## Architecture
+
+This project follows patterns from [Kilo CLI](https://github.com/Kilo-Org/kilo) and [OpenCode](https://github.com/opencode-ai/opencode):
+
+1. **TUI Layer** - OpenTUI for terminal rendering with Solid.js reactivity
+2. **Agent Layer** - Agentic loop with tool calling
+3. **Provider Layer** - Unified LLM interface via Vercel AI SDK
+4. **Tool Layer** - Modular, extensible tool system
+
+## Adding Custom Tools
+
+```typescript
+import { defineTool, toolRegistry } from './tools/registry';
+import { z } from 'zod';
+
+const myTool = defineTool({
+  name: 'my_tool',
+  description: 'A custom tool',
+  parameters: z.object({
+    input: z.string().describe('Input to process'),
+  }),
+  execute: async ({ input }) => {
+    // Your logic here
+    return { result: `Processed: ${input}` };
+  },
+});
+
+toolRegistry.register(myTool);
+```
+
+## Building
+
+```bash
+# Compile to standalone binary
+bun run build
+
+# Output: dist/tui-agent
+```
+
+## License
+
+MIT

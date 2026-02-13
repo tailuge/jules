@@ -13,8 +13,9 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": ".",
+    "jsx": "preserve",
+    "jsxImportSource": "@opentui/solid",
     "paths": {
       "@/*": ["./src/*"]
     }

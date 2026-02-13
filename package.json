@@ -9,9 +9,9 @@
     "tui-agent": "./bin/cli.ts"
   },
   "scripts": {
-    "dev": "bun run src/index.ts",
-    "start": "bun run src/index.ts",
-    "build": "bun build ./src/index.ts --compile --outfile dist/tui-agent",
+    "dev": "bun run src/index.tsx",
+    "start": "bun run src/index.tsx",
+    "build": "bun build ./src/index.tsx --compile --outfile dist/tailuge",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "format": "prettier --write src"

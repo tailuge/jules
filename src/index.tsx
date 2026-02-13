@@ -91,12 +91,12 @@ function App() {
         {messages().map((msg) => (
           <box flexDirection="column">
             {msg.role === "user" ? (
-              <text fg="#FFFFFF">
+              <box flexDirection="row">
                 <text fg="#888888">{"> "}</text>
-                {msg.content as string}
-              </text>
+                <text fg="#FFFFFF">{msg.content as string}</text>
+              </box>
             ) : (
-              <text fg="#FFFFFF">
+              <box flexDirection="row">
                 <text
                   fg={
                     providerColors[config()?.model.provider || "custom"] ||
@@ -105,8 +105,10 @@ function App() {
                 >
                   {config()?.model.name}:{" "}
                 </text>
-                {(msg.content as string) || (isStreaming() ? "..." : "")}
-              </text>
+                <text fg="#FFFFFF">
+                  {(msg.content as string) || (isStreaming() ? "..." : "")}
+                </text>
+              </box>
             )}
           </box>
         ))}

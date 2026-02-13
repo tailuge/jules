@@ -7,16 +7,21 @@ import { generateText, streamText, ModelMessage } from "ai";
 import { z } from "zod";
 import type { Provider } from "./provider";
 
-export interface Tool {
+export interface AgentTool {
   name: string;
   description: string;
   parameters: z.ZodType<any>;
   execute: (args: any) => Promise<any>;
 }
 
+/**
+ * @deprecated Use AgentTool instead
+ */
+export type Tool = AgentTool;
+
 export interface AgentLoopConfig {
   provider: Provider;
-  tools: Record<string, Tool>;
+  tools: Record<string, AgentTool>;
   maxIterations: number;
   systemPrompt?: string;
   onToolCall?: (name: string, args: any) => void;
@@ -40,12 +45,10 @@ export async function* agentLoop(
 ): AsyncGenerator<LoopEvent> {
   const messages: ModelMessage[] = [];
 
-  // Add system prompt if provided
   if (config.systemPrompt) {
     messages.push({ role: "system", content: config.systemPrompt });
   }
 
-  // Add user prompt
   messages.push({ role: "user", content: prompt });
 
   let iteration = 0;
@@ -55,8 +58,7 @@ export async function* agentLoop(
     config.onStep?.(iteration, config.maxIterations);
 
     try {
-      // Convert tools to AI SDK format
-      const toolsSchema = Object.fromEntries(
+      const toolsObject = Object.fromEntries(
         Object.entries(config.tools).map(([name, tool]) => [
           name,
           {
@@ -69,12 +71,9 @@ export async function* agentLoop(
       const result = await generateText({
         model: config.provider.model,
         messages,
-        // @ts-expect-error - Tool schema format needs updating for AI SDK v5
-        tools: toolsSchema,
-        maxSteps: 1,
-      });
+        tools: toolsObject as any,
+      } as any);
 
-      // Yield text response if present
       if (result.text) {
         yield {
           type: "text",
@@ -83,45 +82,43 @@ export async function* agentLoop(
         };
       }
 
-      // Handle tool calls
       if (result.toolCalls && result.toolCalls.length > 0) {
         for (const toolCall of result.toolCalls) {
-          // Yield tool call event
+          const toolName = toolCall.toolName as string;
+          const toolCallArgs = (toolCall as any).args ?? {};
+
           yield {
             type: "tool_call",
             data: {
-              name: toolCall.toolName,
-              // @ts-expect-error - Tool call args type needs updating
-              args: toolCall.args,
+              name: toolName,
+              args: toolCallArgs,
               callId: toolCall.toolCallId,
             },
             timestamp: Date.now(),
           };
 
-          // @ts-expect-error - Tool call args type needs updating
-          config.onToolCall?.(toolCall.toolName, toolCall.args);
+          config.onToolCall?.(toolName, toolCallArgs);
 
-          // Execute tool
-          const tool = config.tools[toolCall.toolName];
+          const tool = config.tools[toolName];
           if (tool) {
             try {
-              // @ts-expect-error - Tool call args type needs updating
-              const result_data = await tool.execute(toolCall.args);
+              const result_data = await tool.execute(toolCallArgs);
               yield {
                 type: "tool_result",
                 data: {
-                  name: toolCall.toolName,
+                  name: toolName,
                   result: result_data,
                   success: true,
                 },
                 timestamp: Date.now(),
               };
-            } catch (error: any) {
+            } catch (error: unknown) {
+              const message = error instanceof Error ? error.message : String(error);
               yield {
                 type: "tool_result",
                 data: {
-                  name: toolCall.toolName,
-                  error: error.message,
+                  name: toolName,
+                  error: message,
                   success: false,
                 },
                 timestamp: Date.now(),
@@ -130,41 +127,35 @@ export async function* agentLoop(
           }
         }
 
-        // Add assistant message with tool calls
+        const toolCallContent = result.toolCalls.map((tc) => ({
+          type: "tool-call" as const,
+          toolCallId: tc.toolCallId,
+          toolName: tc.toolName,
+          args: (tc as any).args ?? {},
+        }));
         messages.push({
           role: "assistant",
-          // @ts-expect-error - Tool call content mapping needs updating for AI SDK v5
-          content: result.toolCalls.map((tc) => ({
-            type: "tool-call",
-            toolCallId: tc.toolCallId,
-            toolName: tc.toolName,
-            // @ts-expect-error - Tool call args type needs updating
-            args: tc.args,
-          })),
+          content: toolCallContent as any,
         });
 
-        // Add tool results
-        // Note: In real implementation, you'd collect all results
         continue;
       }
 
-      // No tool calls - we're done
       yield {
         type: "done",
         data: { iterations: iteration },
         timestamp: Date.now(),
       };
       return;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       yield {
         type: "error",
-        data: { message: error.message, iteration },
+        data: { message, iteration },
         timestamp: Date.now(),
       };
 
-      // Decide whether to retry or abort
-      if (error.message.includes("rate limit")) {
-        // Wait and retry
+      if (message.includes("rate limit")) {
         await new Promise((r) => setTimeout(r, 2000));
         continue;
       }
@@ -173,7 +164,6 @@ export async function* agentLoop(
     }
   }
 
-  // Max iterations reached
   yield {
     type: "done",
     data: { iterations: iteration, maxReached: true },
@@ -181,9 +171,6 @@ export async function* agentLoop(
   };
 }
 
-/**
- * Simple non-streaming agent call
- */
 export async function simpleAgentCall(
   prompt: string,
   provider: Provider,

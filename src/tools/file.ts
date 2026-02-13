@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { defineTool, toolRegistry } from './registry';
+import { createAgentTool, toolRegistry } from './registry';
 
 const readFileSchema = z.object({
   path: z.string().describe('The file path to read'),
@@ -22,7 +22,7 @@ const listDirSchema = z.object({
 /**
  * Read file tool
  */
-const readFileTool = defineTool({
+const readFileTool = createAgentTool({
   name: 'read_file',
   description: 'Read the contents of a file',
   parameters: readFileSchema,
@@ -51,7 +51,7 @@ const readFileTool = defineTool({
 /**
  * Write file tool
  */
-const writeFileTool = defineTool({
+const writeFileTool = createAgentTool({
   name: 'write_file',
   description: 'Write content to a file (creates or overwrites)',
   parameters: writeFileSchema,
@@ -72,7 +72,7 @@ const writeFileTool = defineTool({
 /**
  * List directory tool
  */
-const listDirTool = defineTool({
+const listDirTool = createAgentTool({
   name: 'list_dir',
   description: 'List files and directories in a path',
   parameters: listDirSchema,

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { defineTool, toolRegistry } from './registry';
+import { createAgentTool, toolRegistry } from './registry';
 
 const shellToolSchema = z.object({
   command: z.string().describe('The shell command to execute'),
@@ -41,7 +41,7 @@ async function executeShell(args: z.infer<typeof shellToolSchema>): Promise<any>
  * Register shell tool
  */
 export function registerShellTool(allowedCommands?: string[]) {
-  const tool = defineTool({
+  const tool = createAgentTool({
     name: 'shell',
     description: `Execute a shell command. ${allowedCommands
       ? `Allowed commands: ${allowedCommands.join(', ')}`

@@ -3,6 +3,7 @@
  * Unified interface for multiple LLM vendors
  */
 
+import type { LanguageModel } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
@@ -26,74 +27,91 @@ export interface ModelConfig {
 }
 
 export interface Provider {
-  model: any;
+  model: LanguageModel;
   name: string;
   provider: ProviderType;
 }
 
-/**
- * Create a model instance based on configuration
- */
+function resolveApiKey(config: ModelConfig): string {
+  const apiKey = config.apiKey || process.env[getApiKeyEnv(config.provider)];
+  if (!apiKey) {
+    throw new Error(
+      `API key required for ${config.provider}. Set ${getApiKeyEnv(config.provider)} env var.`,
+    );
+  }
+  return apiKey;
+}
+
 export function createProvider(config: ModelConfig): Provider {
+  const apiKey = resolveApiKey(config);
+
   switch (config.provider) {
-    case "anthropic":
+    case "anthropic": {
+      const anthropicModel = anthropic(config.name);
       return {
-        model: anthropic(config.name),
+        model: anthropicModel as unknown as LanguageModel,
         name: config.name,
         provider: "anthropic",
       };
+    }
 
-    case "openai":
+    case "openai": {
+      const openaiModel = openai(config.name);
       return {
-        model: openai(config.name),
+        model: openaiModel as unknown as LanguageModel,
         name: config.name,
         provider: "openai",
       };
+    }
 
-    case "google":
+    case "google": {
+      const googleModel = google(config.name);
       return {
-        model: google(config.name),
+        model: googleModel as unknown as LanguageModel,
         name: config.name,
         provider: "google",
       };
+    }
 
-    case "groq":
+    case "groq": {
+      const groqModel = groq(config.name);
       return {
-        model: groq(config.name),
+        model: groqModel as unknown as LanguageModel,
         name: config.name,
         provider: "groq",
       };
+    }
 
-    case "mistral":
+    case "mistral": {
+      const mistralModel = mistral(config.name);
       return {
-        model: mistral(config.name),
+        model: mistralModel as unknown as LanguageModel,
         name: config.name,
         provider: "mistral",
       };
+    }
 
-    case "custom":
+    case "custom": {
       if (!config.baseUrl) {
         throw new Error("baseUrl is required for custom provider");
       }
       const customProvider = createOpenAICompatible({
         name: "custom",
         baseURL: config.baseUrl,
-        apiKey: config.apiKey,
+        apiKey,
       });
       return {
-        model: customProvider(config.name),
+        model: customProvider(config.name) as unknown as LanguageModel,
         name: config.name,
         provider: "custom",
       };
+    }
 
     default:
       throw new Error(`Unknown provider: ${config.provider}`);
   }
 }
 
-/**
- * Get default model for each provider
- */
 export function getDefaultModel(provider: ProviderType): string {
   const defaults: Record<ProviderType, string> = {
     anthropic: "claude-sonnet-4-20250514",
@@ -106,9 +124,6 @@ export function getDefaultModel(provider: ProviderType): string {
   return defaults[provider];
 }
 
-/**
- * Get API key environment variable for each provider
- */
 export function getApiKeyEnv(provider: ProviderType): string {
   const envVars: Record<ProviderType, string> = {
     anthropic: "ANTHROPIC_API_KEY",

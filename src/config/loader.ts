@@ -85,7 +85,7 @@ function applyEnvOverrides(config: Config): Config {
  * Load and merge configuration
  */
 export async function loadConfig(): Promise<Config> {
-  let config = { ...defaultConfig };
+  let config = defaultConfig;
 
   // Try to load from file
   const configPath = await findConfigFile();

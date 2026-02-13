@@ -3,7 +3,7 @@
  * Core reasoning and action execution cycle
  */
 
-import { generateText, streamText, CoreMessage } from "ai";
+import { generateText, streamText, ModelMessage } from "ai";
 import { z } from "zod";
 import type { Provider } from "./provider";
 
@@ -38,7 +38,7 @@ export async function* agentLoop(
   prompt: string,
   config: AgentLoopConfig,
 ): AsyncGenerator<LoopEvent> {
-  const messages: CoreMessage[] = [];
+  const messages: ModelMessage[] = [];
 
   // Add system prompt if provided
   if (config.systemPrompt) {
@@ -189,7 +189,7 @@ export async function simpleAgentCall(
   provider: Provider,
   systemPrompt?: string,
 ): Promise<string> {
-  const messages: CoreMessage[] = [];
+  const messages: ModelMessage[] = [];
 
   if (systemPrompt) {
     messages.push({ role: "system", content: systemPrompt });
@@ -206,11 +206,11 @@ export async function simpleAgentCall(
 }
 
 export async function* streamChat(
-  messages: CoreMessage[],
+  messages: ModelMessage[],
   provider: Provider,
   systemPrompt?: string,
 ): AsyncGenerator<string> {
-  const allMessages: CoreMessage[] = [];
+  const allMessages: ModelMessage[] = [];
 
   if (systemPrompt) {
     allMessages.push({ role: "system", content: systemPrompt });

@@ -1,6 +1,6 @@
 import { render } from "@opentui/solid";
 import { createSignal, onMount, createMemo } from "solid-js";
-import { CoreMessage } from "ai";
+import { ModelMessage } from "ai";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
 import type { Config } from "./config/schema";
@@ -14,7 +14,7 @@ import {
 
 initConsoleCapture();
 
-type TimestampedMessage = CoreMessage & {
+type TimestampedMessage = ModelMessage & {
   timestamp: Date;
 };
 

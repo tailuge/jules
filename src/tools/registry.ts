@@ -4,29 +4,29 @@
  */
 
 import { z } from 'zod';
-import type { Tool } from '../agent/loop';
+import type { AgentTool } from '../agent/loop';
 
 export class ToolRegistry {
-  private tools: Map<string, Tool> = new Map();
+  private tools: Map<string, AgentTool> = new Map();
 
   /**
    * Register a new tool
    */
-  register(tool: Tool): void {
+  register(tool: AgentTool): void {
     this.tools.set(tool.name, tool);
   }
 
   /**
    * Get a tool by name
    */
-  get(name: string): Tool | undefined {
+  get(name: string): AgentTool | undefined {
     return this.tools.get(name);
   }
 
   /**
    * Get all registered tools
    */
-  getAll(): Record<string, Tool> {
+  getAll(): Record<string, AgentTool> {
     return Object.fromEntries(this.tools);
   }
 
@@ -55,17 +55,14 @@ export class ToolRegistry {
 // Global tool registry instance
 export const toolRegistry = new ToolRegistry();
 
-/**
- * Helper to define a tool with type safety
- */
-export function defineTool<T extends z.ZodType<any>>(
+export function createAgentTool<T extends z.ZodType<any>>(
   config: {
     name: string;
     description: string;
     parameters: T;
     execute: (args: z.infer<T>) => Promise<any>;
   }
-): Tool {
+): AgentTool {
   return {
     name: config.name,
     description: config.description,
@@ -73,3 +70,8 @@ export function defineTool<T extends z.ZodType<any>>(
     execute: config.execute,
   };
 }
+
+/**
+ * @deprecated Use createAgentTool instead
+ */
+export const defineTool = createAgentTool;

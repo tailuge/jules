@@ -1,18 +1,55 @@
 import { render } from "@opentui/solid";
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onMount, createMemo } from "solid-js";
 import { CoreMessage } from "ai";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
 import type { Config } from "./config/schema";
 import { streamChat } from "./agent/loop";
 import { createProvider } from "./agent/provider";
+import {
+  initConsoleCapture,
+  getCapturedMessages,
+  type CapturedMessage,
+} from "./utils/console-capture";
+
+initConsoleCapture();
+
+type TimestampedMessage = CoreMessage & {
+  timestamp: Date;
+};
+
+type DisplayItem =
+  | { type: "chat"; message: TimestampedMessage }
+  | { type: "console"; message: CapturedMessage };
 
 function App() {
   const [version, setVersion] = createSignal("...");
   const [config, setConfig] = createSignal<Config | null>(null);
   const [inputValue, setInputValue] = createSignal("");
-  const [messages, setMessages] = createSignal<CoreMessage[]>([]);
+  const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
+
+  const displayItems = createMemo(() => {
+    const chatItems: DisplayItem[] = messages().map((msg) => ({
+      type: "chat" as const,
+      message: msg,
+    }));
+    const consoleItems: DisplayItem[] = getCapturedMessages()().map((msg) => ({
+      type: "console" as const,
+      message: msg,
+    }));
+    return [...chatItems, ...consoleItems].sort((a, b) => {
+      const timeA =
+        a.type === "chat"
+          ? a.message.timestamp.getTime()
+          : a.message.timestamp.getTime();
+      const timeB =
+        b.type === "chat"
+          ? b.message.timestamp.getTime()
+          : b.message.timestamp.getTime();
+      return timeA - timeB;
+    });
+  });
 
   onMount(async () => {
     const [v, cfg] = await Promise.all([getVersion(), loadConfig()]);
@@ -24,13 +61,20 @@ function App() {
     const trimmed = inputValue().trim();
     if (!trimmed || isStreaming() || !config()) return;
 
-    const userMessage: CoreMessage = { role: "user", content: trimmed };
+    const userMessage: TimestampedMessage = {
+      role: "user",
+      content: trimmed,
+      timestamp: new Date(),
+    };
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsStreaming(true);
 
     const assistantIndex = messages().length + 1;
-    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "", timestamp: new Date() },
+    ]);
 
     try {
       const provider = createProvider(config()!.model);
@@ -55,6 +99,7 @@ function App() {
         updated[assistantIndex] = {
           role: "assistant",
           content: `Error: ${error.message}`,
+          timestamp: new Date(),
         };
         return updated;
       });
@@ -70,6 +115,52 @@ function App() {
     groq: "#F55036",
     mistral: "#FF7000",
     custom: "#9B59B6",
+  };
+
+  const renderDisplayItem = (item: DisplayItem) => {
+    if (item.type === "console") {
+      const levelColors = {
+        error: "#FF0000",
+        warn: "#FFFF00",
+        log: "#00FFFF",
+      };
+      const levelPrefixes = {
+        error: "[ERROR]",
+        warn: "[WARN]",
+        log: "[LOG]",
+      };
+      return (
+        <box flexDirection="row">
+          <text fg={levelColors[item.message.level]}>
+            {levelPrefixes[item.message.level]}{" "}
+          </text>
+          <text fg="#FFFFFF">{item.message.message}</text>
+        </box>
+      );
+    }
+
+    const msg = item.message;
+    if (msg.role === "user") {
+      return (
+        <box flexDirection="row">
+          <text fg="#888888">{"> "}</text>
+          <text fg="#FFFFFF">{msg.content as string}</text>
+        </box>
+      );
+    }
+
+    return (
+      <box flexDirection="row">
+        <text
+          fg={providerColors[config()?.model.provider || "custom"] || "#00FFFF"}
+        >
+          {config()?.model.name}:{" "}
+        </text>
+        <text fg="#FFFFFF">
+          {(msg.content as string) || (isStreaming() ? "..." : "")}
+        </text>
+      </box>
+    );
   };
 
   return (
@@ -88,29 +179,8 @@ function App() {
         <text fg="#666666">v{version()}</text>
       </box>
       <scrollbox flexGrow={1} padding={1}>
-        {messages().map((msg) => (
-          <box flexDirection="column">
-            {msg.role === "user" ? (
-              <box flexDirection="row">
-                <text fg="#888888">{"> "}</text>
-                <text fg="#FFFFFF">{msg.content as string}</text>
-              </box>
-            ) : (
-              <box flexDirection="row">
-                <text
-                  fg={
-                    providerColors[config()?.model.provider || "custom"] ||
-                    "#00FFFF"
-                  }
-                >
-                  {config()?.model.name}:{" "}
-                </text>
-                <text fg="#FFFFFF">
-                  {(msg.content as string) || (isStreaming() ? "..." : "")}
-                </text>
-              </box>
-            )}
-          </box>
+        {displayItems().map((item) => (
+          <box flexDirection="column">{renderDisplayItem(item)}</box>
         ))}
       </scrollbox>
       <box flexDirection="row" padding={1}>

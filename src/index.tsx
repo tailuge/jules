@@ -1,5 +1,5 @@
 import { render } from "@opentui/solid";
-import { createSignal, onMount, createMemo } from "solid-js";
+import { createSignal, onMount, createMemo, Show, For } from "solid-js";
 import { ModelMessage } from "ai";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
@@ -9,6 +9,7 @@ import { createProvider } from "./agent/provider";
 import {
   initConsoleCapture,
   getCapturedMessages,
+  clearCapturedMessages,
   type CapturedMessage,
 } from "./utils/console-capture";
 
@@ -61,6 +62,32 @@ function App() {
     const trimmed = inputValue().trim();
     if (!trimmed || isStreaming() || !config()) return;
 
+    if (trimmed === "/clear") {
+      setMessages([]);
+      clearCapturedMessages();
+      setInputValue("");
+      return;
+    }
+
+    if (trimmed === "/help") {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "user",
+          content: "/help",
+          timestamp: new Date(),
+        },
+        {
+          role: "assistant",
+          content:
+            "Available commands:\n  /help  - Show this help message\n  /clear - Clear the conversation history\n  Ctrl+C - Exit the application",
+          timestamp: new Date(),
+        },
+      ]);
+      setInputValue("");
+      return;
+    }
+
     const userMessage: TimestampedMessage = {
       role: "user",
       content: trimmed,
@@ -70,7 +97,7 @@ function App() {
     setInputValue("");
     setIsStreaming(true);
 
-    const assistantIndex = messages().length + 1;
+    const assistantIndex = messages().length;
     setMessages((prev) => [
       ...prev,
       { role: "assistant", content: "", timestamp: new Date() },
@@ -179,9 +206,26 @@ function App() {
         <text fg="#666666">v{version()}</text>
       </box>
       <scrollbox flexGrow={1} padding={1}>
-        {displayItems().map((item) => (
-          <box flexDirection="column">{renderDisplayItem(item)}</box>
-        ))}
+        <Show
+          when={displayItems().length > 0}
+          fallback={
+            <box
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              height="100%"
+            >
+              <text fg="#666666">Welcome to TaiLuGe TUI Agent</text>
+              <text fg="#444444" marginTop={1}>
+                Type a message to start or /help for commands
+              </text>
+            </box>
+          }
+        >
+          <For each={displayItems()}>
+            {(item) => <box flexDirection="column">{renderDisplayItem(item)}</box>}
+          </For>
+        </Show>
       </scrollbox>
       <box flexDirection="row" padding={1}>
         <text fg="#888888">{"> "}</text>
@@ -193,6 +237,18 @@ function App() {
           flexGrow={1}
         />
         {isStreaming() && <text fg="#888888"> streaming...</text>}
+      </box>
+      <box flexDirection="row" paddingX={1} marginBottom={1}>
+        <text fg="#444444">Help: </text>
+        <text fg="#666666">/help </text>
+        <text fg="#444444" marginLeft={2}>
+          Clear:{" "}
+        </text>
+        <text fg="#666666">/clear </text>
+        <text fg="#444444" marginLeft={2}>
+          Exit:{" "}
+        </text>
+        <text fg="#666666">Ctrl+C</text>
       </box>
     </box>
   );

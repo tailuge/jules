@@ -18,6 +18,7 @@ Run these commands before committing changes:
 
 ```bash
 bun run typecheck  # Type check (required)
+bun run test       # Run tests (required)
 bun run lint       # Lint code (required)
 bun run build      # Build standalone binary
 ```
@@ -28,12 +29,13 @@ bun run build      # Build standalone binary
 - ES modules (`"type": "module"`)
 - Path alias: `@/*` maps to `./src/*`
 - No comments unless requested
+- All files should end with a single newline character.
 
 ## Project Structure
 
 ```
 src/
-├── index.ts          # Entry point
+├── index.tsx         # Entry point (TUI Application)
 ├── agent/            # Agentic loop and provider logic
 ├── tools/            # Tool definitions and registry
 ├── config/           # Config schema and loader
@@ -42,9 +44,34 @@ src/
 
 ## Architecture
 
-- TUI: OpenTUI with Solid.js
-- LLM: Vercel AI SDK with multi-provider support
-- Agent: ReAct-style agentic loop
+- **TUI Layer**: Built with OpenTUI and Solid.js for reactive terminal interfaces.
+- **Agent Layer**: Implements a ReAct-style agentic loop using the Vercel AI SDK.
+- **Provider Layer**: Multi-provider support (Anthropic, OpenAI, etc.) via AI SDK.
+- **Tool Layer**: Modular tool system for shell, file operations, etc.
+
+## Testing Best Practices
+
+- **Unit Testing**: Target core logic in `agent/`, `config/`, and `tools/`. Use `bun test`.
+- **Mocking**: Always mock external APIs (like LLM providers) using `mock.module("ai", ...)` or similar.
+- **TUI Testing**: When possible, test TUI components by isolating logic from rendering or mocking the renderer components.
+- **Tool Testing**: Each tool should have tests for successful execution, failure modes, and edge cases.
+- **Property-Based Testing**: Consider for configuration validation and complex data processing.
+
+## TUI Development Principles
+
+- **Reactivity**: Leverage Solid.js signals and memos for efficient UI updates. Avoid direct DOM/terminal manipulation.
+- **Non-blocking I/O**: Long-running operations (LLM calls, shell tools) MUST be async to keep the TUI responsive.
+- **Visual Feedback**: Provide clear indicators for agent states: "Thinking", "Streaming", "Executing [Tool]".
+- **Keyboard First**: Ensure the app is fully navigable via keyboard. Use `focused` prop on the active input.
+- **Error Handling**: Display errors gracefully within the TUI (e.g., in the chat or a status bar).
+- **Graceful Exit**: Always use `renderer.destroy()` to clean up the terminal state.
+
+## Tool Development
+
+- **Safety First**: Tools that interact with the host system (like `shell`) should have safety controls (allowlists, timeouts, sandboxing).
+- **Clear Descriptions**: Tool and parameter descriptions are used by the LLM for reasoning. Keep them concise and accurate.
+- **Atomic Operations**: Favor small, well-defined tools over complex, multi-purpose ones.
+- **Error Reporting**: Tools should return structured error information that the agent can use to recover.
 
 ## OpenTUI Notes
 

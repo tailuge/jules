@@ -27,7 +27,7 @@
     "@ai-sdk/groq": "^2.0.0",
     "@ai-sdk/mistral": "^2.0.0",
     "@ai-sdk/openai": "^2.0.0",
-    "@ai-sdk/openai-compatible": "^1.0.0",
+    "@ai-sdk/openai-compatible": "^2.0.30",
     "@clack/prompts": "^1.0.1",
     "@modelcontextprotocol/sdk": "^1.25.0",
     "@opentui/core": "^0.1.79",

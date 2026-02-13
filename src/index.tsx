@@ -1,14 +1,18 @@
 import { render } from "@opentui/solid";
 import { createSignal, onMount } from "solid-js";
+import { CoreMessage } from "ai";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
 import type { Config } from "./config/schema";
+import { streamChat } from "./agent/loop";
+import { createProvider } from "./agent/provider";
 
 function App() {
   const [version, setVersion] = createSignal("...");
   const [config, setConfig] = createSignal<Config | null>(null);
   const [inputValue, setInputValue] = createSignal("");
-  const [messages, setMessages] = createSignal<string[]>([]);
+  const [messages, setMessages] = createSignal<CoreMessage[]>([]);
+  const [isStreaming, setIsStreaming] = createSignal(false);
 
   onMount(async () => {
     const [v, cfg] = await Promise.all([getVersion(), loadConfig()]);
@@ -16,11 +20,46 @@ function App() {
     setConfig(cfg);
   });
 
-  const handleSubmit = (value: unknown) => {
-    const trimmed = String(value).trim() || inputValue().trim();
-    if (trimmed) {
-      setMessages((prev) => [...prev, trimmed]);
-      setInputValue("");
+  const handleSubmit = async (_event: unknown) => {
+    const trimmed = inputValue().trim();
+    if (!trimmed || isStreaming() || !config()) return;
+
+    const userMessage: CoreMessage = { role: "user", content: trimmed };
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
+    setIsStreaming(true);
+
+    const assistantIndex = messages().length + 1;
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+    try {
+      const provider = createProvider(config()!.model);
+      const generator = streamChat(messages().slice(0, -1), provider);
+
+      for await (const chunk of generator) {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const lastMsg = updated[assistantIndex];
+          if (lastMsg && lastMsg.role === "assistant") {
+            updated[assistantIndex] = {
+              ...lastMsg,
+              content: (lastMsg.content as string) + chunk,
+            };
+          }
+          return updated;
+        });
+      }
+    } catch (error: any) {
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[assistantIndex] = {
+          role: "assistant",
+          content: `Error: ${error.message}`,
+        };
+        return updated;
+      });
+    } finally {
+      setIsStreaming(false);
     }
   };
 
@@ -50,7 +89,26 @@ function App() {
       </box>
       <scrollbox flexGrow={1} padding={1}>
         {messages().map((msg) => (
-          <text fg="#FFFFFF">{msg}</text>
+          <box flexDirection="column">
+            {msg.role === "user" ? (
+              <text fg="#FFFFFF">
+                <text fg="#888888">{"> "}</text>
+                {msg.content as string}
+              </text>
+            ) : (
+              <text fg="#FFFFFF">
+                <text
+                  fg={
+                    providerColors[config()?.model.provider || "custom"] ||
+                    "#00FFFF"
+                  }
+                >
+                  {config()?.model.name}:{" "}
+                </text>
+                {(msg.content as string) || (isStreaming() ? "..." : "")}
+              </text>
+            )}
+          </box>
         ))}
       </scrollbox>
       <box flexDirection="row" padding={1}>
@@ -59,9 +117,10 @@ function App() {
           value={inputValue()}
           onInput={setInputValue}
           onSubmit={handleSubmit as any}
-          focused
+          focused={!isStreaming()}
           flexGrow={1}
         />
+        {isStreaming() && <text fg="#888888"> streaming...</text>}
       </box>
     </box>
   );

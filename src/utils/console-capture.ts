@@ -1,4 +1,7 @@
+import { appendFileSync } from "node:fs";
 import { createSignal } from "solid-js";
+
+const LOG_FILE = "/tmp/tailuge-debug.log";
 
 export type LogLevel = "log" | "error" | "warn";
 
@@ -36,17 +39,33 @@ function formatArgs(args: unknown[]): string {
   return args.map(stringifyArg).join(" ");
 }
 
+function writeToLogFile(
+  level: LogLevel,
+  message: string,
+  timestamp: Date,
+): void {
+  const logLine = `${timestamp.toISOString()} [${level.toUpperCase()}] ${message}\n`;
+  try {
+    appendFileSync(LOG_FILE, logLine);
+  } catch {
+    // Silently ignore file write errors
+  }
+}
+
 function captureMessage(level: LogLevel, ...args: unknown[]): void {
   const message = formatArgs(args);
+  const timestamp = new Date();
   const entry: CapturedMessage = {
     level,
     message,
-    timestamp: new Date(),
+    timestamp,
   };
   setCapturedMessages((prev) => [...prev, entry]);
+  writeToLogFile(level, message, timestamp);
 }
 
 export function initConsoleCapture(): void {
+  console.log("initConsoleCapture called");
   if (isCapturing) return;
 
   originalConsoleLog = console.log;
@@ -69,6 +88,7 @@ export function initConsoleCapture(): void {
   };
 
   isCapturing = true;
+  console.log("Console capture active");
 }
 
 export function restoreConsole(): void {
@@ -91,3 +111,5 @@ export function getCapturedMessages(): () => CapturedMessage[] {
 export function clearCapturedMessages(): void {
   setCapturedMessages([]);
 }
+
+writeToLogFile("log", "Console capture initialized", new Date());

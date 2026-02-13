@@ -42,6 +42,17 @@ src/
 └── utils/            # Utilities
 ```
 
+## Required Skills
+
+Always load these skills before working with relevant code:
+
+- **opentui**: Load when working on TUI components, keyboard handling, or any `@opentui/*` imports
+- **ai-sdk**: Load when working with LLM integration, providers, or any `ai` package imports
+
+```
+Use the skill tool with name: "opentui" or "ai-sdk"
+```
+
 ## Architecture
 
 - **TUI Layer**: Built with OpenTUI and Solid.js for reactive terminal interfaces.

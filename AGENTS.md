@@ -2,6 +2,23 @@
 
 Project conventions for AI agents working on this codebase.
 
+## Prerequisites
+
+### Install Bun
+
+This project uses **Bun** as the package manager. Install it first:
+
+```bash
+# macOS/Linux
+curl -fsSL https://bun.sh/install | bash
+
+# or using Homebrew
+brew install bun
+
+# verify installation
+bun --version
+```
+
 ## Package Manager
 
 This project uses **Bun** exclusively. Do not use npm, yarn, or pnpm.

@@ -211,14 +211,22 @@ export async function* streamChat(
   });
 
   let emitted = false;
-  for await (const chunk of result.textStream) {
-    emitted = true;
-    yield chunk;
+  const textStream = (result as { textStream?: AsyncIterable<string> }).textStream;
+  if (
+    textStream &&
+    typeof (textStream as { [Symbol.asyncIterator]?: unknown })[
+      Symbol.asyncIterator
+    ] === "function"
+  ) {
+    for await (const chunk of textStream) {
+      emitted = true;
+      yield chunk;
+    }
   }
 
-  const textPromise = (result as unknown as { text?: PromiseLike<string> }).text;
-  if (!emitted && textPromise) {
-    const fullText = await textPromise;
+  const finalText = await (result as { text?: string | PromiseLike<string> }).text;
+  if (!emitted && typeof finalText === "string") {
+    const fullText = finalText;
     if (fullText) {
       yield fullText;
     }

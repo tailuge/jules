@@ -1,16 +1,23 @@
-import { render } from "@opentui/solid";
-import { createSignal, onMount, createMemo } from "solid-js";
+import { render, useRenderer, useSelectionHandler } from "@opentui/solid";
+import { createSignal, onMount, createMemo, onCleanup } from "solid-js";
 import { type ModelMessage } from "ai";
+import clipboard from "clipboardy";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
 import type { Config } from "./config/schema";
 import { streamChat } from "./agent/loop";
 import { createProvider } from "./agent/provider";
 import {
+  listAvailableModelsForProvider,
+  formatAvailableModelsMessage,
+} from "./agent/models";
+import {
   initConsoleCapture,
+  initRuntimeErrorCapture,
   addCapturedMessage,
   getCapturedMessages,
   clearCapturedMessages,
+  restoreRuntimeErrorCapture,
 } from "./utils/console-capture";
 import { TimestampedMessage, DisplayItem } from "./types";
 import { Header } from "./components/Header";
@@ -19,6 +26,7 @@ import { InputArea } from "./components/InputArea";
 import { Footer } from "./components/Footer";
 
 initConsoleCapture();
+initRuntimeErrorCapture();
 
 function toModelMessages(messages: TimestampedMessage[]): ModelMessage[] {
   return messages.map((message) => ({
@@ -28,15 +36,35 @@ function toModelMessages(messages: TimestampedMessage[]): ModelMessage[] {
 }
 
 function App() {
+  const renderer = useRenderer();
   const [version, setVersion] = createSignal("...");
   const [config, setConfig] = createSignal<Config | null>(null);
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
+  const capturedMessages = getCapturedMessages();
+  let lastCopiedSelection = "";
+
+  useSelectionHandler((selection) => {
+    const selectedText = selection.getSelectedText();
+    if (!selectedText || selectedText === lastCopiedSelection) {
+      return;
+    }
+
+    lastCopiedSelection = selectedText;
+    const copiedToTerminalClipboard = renderer.copyToClipboardOSC52(selectedText);
+
+    if (!copiedToTerminalClipboard) {
+      clipboard.write(selectedText).catch(() => {});
+      return;
+    }
+
+    clipboard.write(selectedText).catch(() => {});
+  });
 
   const displayItems = createMemo(() => {
     const msgs = messages();
-    const consoleMsgs = getCapturedMessages()();
+    const consoleMsgs = capturedMessages();
     const chatItems: DisplayItem[] = msgs.map((msg) => ({
       type: "chat" as const,
       message: msg,
@@ -52,6 +80,19 @@ function App() {
   });
 
   onMount(async () => {
+    const toggleConsoleHandler = (sequence: string) => {
+      if (sequence === "`") {
+        renderer.console.toggle();
+        return true;
+      }
+      return false;
+    };
+    renderer.prependInputHandler(toggleConsoleHandler);
+    onCleanup(() => {
+      renderer.removeInputHandler(toggleConsoleHandler);
+      restoreRuntimeErrorCapture();
+    });
+
     const [v, cfg] = await Promise.all([getVersion(), loadConfig()]);
     setVersion(v);
     setConfig(cfg);
@@ -75,6 +116,58 @@ function App() {
       return;
     }
 
+    if (trimmed === "/exit" || trimmed === "/quit" || trimmed === "/q") {
+      renderer.destroy();
+      return;
+    }
+
+    if (trimmed === "/models") {
+      setInputValue("");
+      addCapturedMessage(
+        "log",
+        `Fetching models for provider ${activeConfig.model.provider}`,
+      );
+      try {
+        const models = await listAvailableModelsForProvider(
+          activeConfig.model.provider,
+        );
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "user",
+            content: "/models",
+            timestamp: new Date(),
+          },
+          {
+            role: "assistant",
+            content: formatAvailableModelsMessage(
+              activeConfig.model.provider,
+              models,
+            ),
+            timestamp: new Date(),
+          },
+        ]);
+      } catch (error: any) {
+        const message =
+          error instanceof Error ? error.message : "Unknown models error";
+        addCapturedMessage("error", `Failed to fetch models: ${message}`);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "user",
+            content: "/models",
+            timestamp: new Date(),
+          },
+          {
+            role: "assistant",
+            content: `Error: ${message}\nSet AI_GATEWAY_API_KEY to use /models.`,
+            timestamp: new Date(),
+          },
+        ]);
+      }
+      return;
+    }
+
     if (trimmed === "/help") {
       setMessages((prev) => [
         ...prev,
@@ -86,7 +179,7 @@ function App() {
         {
           role: "assistant",
           content:
-            "Available commands:\n  /help  - Show this help message\n  /clear - Clear the conversation history\n  Ctrl+C - Exit the application",
+            "Available commands:\n  /help   - Show this help message\n  /models - List available models for current provider\n  /clear  - Clear the conversation history\n  /exit   - Exit the application\n  /quit   - Exit the application\n  /q      - Exit the application",
           timestamp: new Date(),
         },
       ]);
@@ -187,4 +280,4 @@ function App() {
   );
 }
 
-render(() => <App />, { exitOnCtrlC: true });
+render(() => <App />, { exitOnCtrlC: false });

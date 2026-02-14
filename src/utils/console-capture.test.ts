@@ -2,10 +2,11 @@ import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { createRoot } from "solid-js";
 import {
   initConsoleCapture,
+  initRuntimeErrorCapture,
   restoreConsole,
+  restoreRuntimeErrorCapture,
   getCapturedMessages,
   clearCapturedMessages,
-  type CapturedMessage,
 } from "./console-capture";
 
 const originalConsoleLog = console.log;
@@ -21,6 +22,7 @@ describe("console-capture", () => {
 
   afterEach(() => {
     restoreConsole();
+    restoreRuntimeErrorCapture();
   });
 
   it("captureMessage updates signal correctly", () => {
@@ -95,6 +97,40 @@ describe("console-capture", () => {
 
       messages = getCapturedMessages()();
       expect(messages.length).toBe(0);
+
+      dispose();
+    });
+  });
+
+  it("captures unhandled rejection events", () => {
+    createRoot((dispose) => {
+      clearCapturedMessages();
+      initRuntimeErrorCapture();
+
+      process.emit("unhandledRejection", new Error("quota exceeded"), Promise.resolve());
+
+      const messages = getCapturedMessages()();
+      expect(messages.length).toBe(1);
+      expect(messages[0].level).toBe("error");
+      expect(messages[0].message).toContain("Unhandled rejection");
+      expect(messages[0].message).toContain("quota exceeded");
+
+      dispose();
+    });
+  });
+
+  it("captures uncaught exception events", () => {
+    createRoot((dispose) => {
+      clearCapturedMessages();
+      initRuntimeErrorCapture();
+
+      process.emit("uncaughtException", new Error("boom"), "uncaughtException");
+
+      const messages = getCapturedMessages()();
+      expect(messages.length).toBe(1);
+      expect(messages[0].level).toBe("error");
+      expect(messages[0].message).toContain("Uncaught exception");
+      expect(messages[0].message).toContain("boom");
 
       dispose();
     });

@@ -8,9 +8,17 @@ export function Footer() {
       </text>
       <text fg="#666666">/clear </text>
       <text fg="#444444" marginLeft={2}>
+        Models:{" "}
+      </text>
+      <text fg="#666666">/models </text>
+      <text fg="#444444" marginLeft={2}>
+        Console:{" "}
+      </text>
+      <text fg="#666666">` </text>
+      <text fg="#444444" marginLeft={2}>
         Exit:{" "}
       </text>
-      <text fg="#666666">Ctrl+C</text>
+      <text fg="#666666">/exit, /quit, or /q</text>
     </box>
   );
 }

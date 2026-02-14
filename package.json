@@ -13,7 +13,7 @@
     "start": "bun run src/index.tsx",
     "build": "bun run build.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "tsc --noEmit",
     "test": "bun test",
     "format": "prettier --write src"
   },

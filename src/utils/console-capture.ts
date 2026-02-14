@@ -1,7 +1,4 @@
-import { appendFileSync, writeFileSync } from "node:fs";
 import { createSignal } from "solid-js";
-
-const LOG_FILE = "/tmp/tailuge-debug.log";
 
 export type LogLevel = "log" | "error" | "warn";
 
@@ -18,12 +15,13 @@ const [capturedMessages, setCapturedMessages] = createSignal<CapturedMessage[]>(
 let originalConsoleLog: typeof console.log | null = null;
 let originalConsoleError: typeof console.error | null = null;
 let originalConsoleWarn: typeof console.warn | null = null;
+let unhandledRejectionHandler:
+  | ((reason: unknown, promise: Promise<unknown>) => void)
+  | null = null;
+let uncaughtExceptionHandler:
+  | ((error: Error, origin: NodeJS.UncaughtExceptionOrigin) => void)
+  | null = null;
 let isCapturing = false;
-
-function debugLog(msg: string): void {
-  const line = `${new Date().toISOString()} [DEBUG] ${msg}\n`;
-  appendFileSync(LOG_FILE, line);
-}
 
 function stringifyArg(arg: unknown): string {
   if (arg === null) return "null";
@@ -51,44 +49,25 @@ export function addCapturedMessage(level: LogLevel, message: string): void {
     message,
     timestamp,
   };
-  debugLog(`about to call setCapturedMessages, current length: ${capturedMessages().length}`);
   setCapturedMessages((prev) => {
-    debugLog(`setCapturedMessages callback, prev length: ${prev.length}`);
     return [...prev, entry];
   });
-  debugLog(`setCapturedMessages done, new length: ${capturedMessages().length}`);
-  
-  const logLine = `${timestamp.toISOString()} [${level.toUpperCase()}] ${message}\n`;
-  debugLog(`writing to file: ${logLine.trim()}`);
-  appendFileSync(LOG_FILE, logLine);
 }
 
 function captureMessage(level: LogLevel, ...args: unknown[]): void {
-  debugLog(`captureMessage called: ${level}`);
   addCapturedMessage(level, formatArgs(args));
 }
 
 export function initConsoleCapture(): void {
-  debugLog("initConsoleCapture called, isCapturing: " + isCapturing);
   if (isCapturing) {
-    console.log("Console capture already active, skipping re-init");
     return;
-  }
-
-  try {
-    writeFileSync(LOG_FILE, "");
-    debugLog("log file cleared");
-  } catch (e) {
-    debugLog("failed to clear log file: " + e);
   }
 
   originalConsoleLog = console.log;
   originalConsoleError = console.error;
   originalConsoleWarn = console.warn;
-  debugLog("original console saved");
 
   console.log = (...args: unknown[]) => {
-    debugLog("custom console.log called with " + args.length + " args");
     captureMessage("log", ...args);
     originalConsoleLog!.apply(console, args);
   };
@@ -104,9 +83,6 @@ export function initConsoleCapture(): void {
   };
 
   isCapturing = true;
-  debugLog("about to call console.log('Console capture active')");
-  console.log("Console capture active");
-  debugLog("done calling console.log");
 }
 
 export function restoreConsole(): void {
@@ -128,4 +104,32 @@ export function getCapturedMessages(): () => CapturedMessage[] {
 
 export function clearCapturedMessages(): void {
   setCapturedMessages([]);
+}
+
+export function initRuntimeErrorCapture(): void {
+  if (unhandledRejectionHandler || uncaughtExceptionHandler) {
+    return;
+  }
+
+  unhandledRejectionHandler = (reason: unknown) => {
+    addCapturedMessage("error", `Unhandled rejection: ${stringifyArg(reason)}`);
+  };
+  uncaughtExceptionHandler = (error: Error) => {
+    addCapturedMessage("error", `Uncaught exception: ${stringifyArg(error)}`);
+  };
+
+  process.on("unhandledRejection", unhandledRejectionHandler);
+  process.on("uncaughtException", uncaughtExceptionHandler);
+}
+
+export function restoreRuntimeErrorCapture(): void {
+  if (unhandledRejectionHandler) {
+    process.off("unhandledRejection", unhandledRejectionHandler);
+    unhandledRejectionHandler = null;
+  }
+
+  if (uncaughtExceptionHandler) {
+    process.off("uncaughtException", uncaughtExceptionHandler);
+    uncaughtExceptionHandler = null;
+  }
 }

@@ -25,7 +25,7 @@
 
 
  >
- Help:/help  Clear: /clear  Models:/models  Console:`   Exit:/exit, /quit, or /
+ Help:/help│ Clear: /clear│ Models:/models│ Console:` │ Exit:/exit, /quit, or /
                                                              q
 ```
 

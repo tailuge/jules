@@ -37,7 +37,7 @@ export function MessageItem(props: MessageItemProps) {
   if (msg.role === "user") {
     return (
       <box flexDirection="row">
-        <text fg="#888888">{"> "}</text>
+        <text fg="#888888">{"You: "}</text>
         <text fg="#FFFFFF">{msg.content as string}</text>
       </box>
     );

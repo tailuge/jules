@@ -30,7 +30,7 @@ export function MessageList(props: MessageListProps) {
       >
         <For each={props.displayItems()}>
           {(item) => (
-            <box flexDirection="column">
+            <box flexDirection="column" marginBottom={1}>
               <MessageItem
                 item={item}
                 config={props.config}

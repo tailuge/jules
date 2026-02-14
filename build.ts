@@ -1,12 +1,13 @@
 import solidPlugin from "@opentui/solid/bun-plugin";
-import { renameSync } from "fs";
+import { rmSync } from "fs";
+
+rmSync("./dist", { recursive: true, force: true });
 
 await Bun.build({
   entrypoints: ["./src/index.tsx"],
-  outdir: "./dist",
-  naming: "tailuge",
-  compile: true,
+  target: "bun",
+  compile: {
+    outfile: "./dist/tui-agent",
+  },
   plugins: [solidPlugin],
 });
-
-renameSync("./dist/src", "./dist/tailuge");

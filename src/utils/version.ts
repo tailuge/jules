@@ -1,6 +1,6 @@
 import { $ } from "bun";
+import pkg from "../../package.json" with { type: "json" };
 
-const pkg = await Bun.file("package.json").json();
 const baseVersion = pkg.version || "0.0.0";
 
 async function getGitHash(): Promise<string> {

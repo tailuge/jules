@@ -5,6 +5,7 @@ import clipboard from "clipboardy";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
 import type { Config } from "./config/schema";
+import { createSessionFile } from "./utils/session";
 import { streamChat } from "./agent/loop";
 import { createProvider } from "./agent/provider";
 import {
@@ -38,6 +39,9 @@ export function App(props: AppProps = {}) {
   const renderer = useRenderer();
   const [version, setVersion] = createSignal("...");
   const [config, setConfig] = createSignal<Config | null>(null);
+  const [sessionFilePath, setSessionFilePath] = createSignal<string | null>(
+    null,
+  );
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
@@ -97,13 +101,19 @@ export function App(props: AppProps = {}) {
       restoreRuntimeErrorCapture();
     });
 
-    const [v, cfg] = await Promise.all([getVersion(), loadConfig()]);
+    const [v, cfg, sessionPath] = await Promise.all([
+      getVersion(),
+      loadConfig(),
+      createSessionFile(),
+    ]);
     setVersion(v);
     setConfig(cfg);
+    setSessionFilePath(sessionPath);
     addCapturedMessage(
       "log",
       `Loaded config for ${cfg.model.provider}:${cfg.model.name}`,
     );
+    addCapturedMessage("log", `Created session file: ${sessionPath}`);
   });
 
   const handleSubmit = async () => {

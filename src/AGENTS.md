@@ -11,3 +11,7 @@ This is the main source directory for the TUI Agent application.
 - `config/`: Configuration handling.
 - `tools/`: Agent tool definitions.
 - `utils/`: Common utilities.
+
+## Architecture
+
+- **Session Layer**: Creates timestamped session files in `~/.tui-agent/sessions/` for each application run.

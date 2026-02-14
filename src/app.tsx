@@ -51,7 +51,8 @@ export function App(props: AppProps = {}) {
     }
 
     lastCopiedSelection = selectedText;
-    const copiedToTerminalClipboard = renderer.copyToClipboardOSC52(selectedText);
+    const copiedToTerminalClipboard =
+      renderer.copyToClipboardOSC52(selectedText);
 
     if (!copiedToTerminalClipboard) {
       clipboard.write(selectedText).catch(() => {});
@@ -196,7 +197,10 @@ export function App(props: AppProps = {}) {
       timestamp: new Date(),
     };
     const currentMessages = messages();
-    const conversationForModel = toModelMessages([...currentMessages, userMessage]);
+    const conversationForModel = toModelMessages([
+      ...currentMessages,
+      userMessage,
+    ]);
 
     setMessages((prev) => [
       ...prev,
@@ -271,6 +275,7 @@ export function App(props: AppProps = {}) {
         displayItems={displayItems}
         config={config}
         isStreaming={isStreaming}
+        hideScrollbar={props.skipStartup}
       />
       <InputArea
         inputValue={inputValue}

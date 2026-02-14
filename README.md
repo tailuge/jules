@@ -7,14 +7,14 @@
  ▀█▀ ▄▀█ █ █   █ █ █▀▀ █▀▀                                                 v...
   █  █▀█ █ █▄▄ █▄█ █▄█ ██▄
 
-                                                                              █
-                                                                              █
-                                                                              █
-                                                                              █
-                                                                              █
-                         Welcome to TaiLuGe TUI Agent                         █
-                                                                              █
-                 Type a message to start or /help for commands                ▀
+
+
+
+
+
+                          Welcome to TaiLuGe TUI Agent
+
+                 Type a message to start or /help for commands
 
 
 

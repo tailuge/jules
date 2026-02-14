@@ -7,11 +7,16 @@ interface MessageListProps {
   displayItems: Accessor<DisplayItem[]>;
   config: Accessor<Config | null>;
   isStreaming: Accessor<boolean>;
+  hideScrollbar?: boolean;
 }
 
 export function MessageList(props: MessageListProps) {
   return (
-    <scrollbox flexGrow={1} padding={1}>
+    <scrollbox
+      flexGrow={1}
+      padding={1}
+      scrollbarOptions={{ visible: !props.hideScrollbar }}
+    >
       <Show
         when={props.displayItems().length > 0}
         fallback={

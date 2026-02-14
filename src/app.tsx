@@ -29,6 +29,27 @@ import { InputArea } from "./components/InputArea";
 import { Footer } from "./components/Footer";
 import { SessionSelector } from "./components/SessionSelector";
 
+const CONTEXT_FILES = ["soul.md", "memories.md"];
+
+async function loadContextFiles(): Promise<string> {
+  const contexts: string[] = [];
+  for (const filename of CONTEXT_FILES) {
+    try {
+      const file = Bun.file(filename);
+      const exists = await file.exists();
+      if (exists) {
+        const content = await file.text();
+        if (content.trim()) {
+          contexts.push(`\n\n=== ${filename} ===\n${content}`);
+        }
+      }
+    } catch {
+      // File doesn't exist, skip
+    }
+  }
+  return contexts.join("");
+}
+
 export interface AppProps {
   skipStartup?: boolean;
 }
@@ -68,6 +89,7 @@ export function App(props: AppProps = {}) {
   const [sessionFilePath, setSessionFilePath] = createSignal<string | null>(
     null,
   );
+  const [contextFiles, setContextFiles] = createSignal("");
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
@@ -130,14 +152,22 @@ export function App(props: AppProps = {}) {
       restoreRuntimeErrorCapture();
     });
 
-    const [v, cfg, sessionPath] = await Promise.all([
+    const [v, cfg, sessionPath, context] = await Promise.all([
       getVersion(),
       loadConfig(),
       createSessionFile(),
+      loadContextFiles(),
     ]);
     setVersion(v);
     setConfig(cfg);
     setSessionFilePath(sessionPath);
+    setContextFiles(context);
+    if (context) {
+      addCapturedMessage(
+        "log",
+        `Loaded context files: ${CONTEXT_FILES.join(", ")}`,
+      );
+    }
     addCapturedMessage(
       "log",
       `Loaded config for ${cfg.model.provider}:${cfg.model.name}`,
@@ -248,9 +278,14 @@ export function App(props: AppProps = {}) {
       return;
     }
 
+    const contextContent = contextFiles();
+    const userMessageContent = contextContent
+      ? `${contextContent}\n\n---\n\nUser request: ${trimmed}`
+      : trimmed;
+
     const userMessage: TimestampedMessage = {
       role: "user",
-      content: trimmed,
+      content: userMessageContent,
       timestamp: new Date(),
     };
     const currentMessages = messages();

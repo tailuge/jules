@@ -9,8 +9,8 @@
     "tui-agent": "./bin/cli.ts"
   },
   "scripts": {
-    "dev": "bun run src/index.tsx",
-    "start": "bun run src/index.tsx",
+    "dev": "bun run --preload @opentui/solid/preload src/index.tsx",
+    "start": "bun run --preload @opentui/solid/preload src/index.tsx",
     "build": "bun run build.ts",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",

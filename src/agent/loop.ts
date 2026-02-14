@@ -293,47 +293,44 @@ export async function* streamChatWithTools(
   const toolCalls: Array<{ name: string; args: Record<string, unknown> }> = [];
   let fullText = "";
 
-  const textStream = (result as { textStream?: AsyncIterable<string> })
-    .textStream;
+  const fullStream = (result as { fullStream?: AsyncIterable<any> }).fullStream;
   if (
-    textStream &&
-    typeof (textStream as { [Symbol.asyncIterator]?: unknown })[
+    fullStream &&
+    typeof (fullStream as { [Symbol.asyncIterator]?: unknown })[
       Symbol.asyncIterator
     ] === "function"
   ) {
-    for await (const chunk of textStream) {
-      fullText += chunk;
-      yield { type: "text", data: chunk };
-    }
-  }
+    for await (const part of fullStream) {
+      if (part.type === "text-delta") {
+        const chunk = part.textDelta;
+        fullText += chunk;
+        yield { type: "text", data: chunk };
+      } else if (part.type === "tool-call") {
+        const toolName = part.toolName as string;
+        const toolArgs = part.args ?? {};
+        toolCalls.push({ name: toolName, args: toolArgs });
 
-  const resultData = result as any;
-  if (resultData.toolCalls && resultData.toolCalls.length > 0) {
-    for (const tc of resultData.toolCalls) {
-      const toolName = tc.toolName as string;
-      const toolArgs = tc.args ?? {};
-      toolCalls.push({ name: toolName, args: toolArgs });
+        config.onLogToolCall?.(toolName, toolArgs);
+        yield { type: "tool_call", data: { name: toolName, args: toolArgs } };
 
-      config.onLogToolCall?.(toolName, toolArgs);
-      yield { type: "tool_call", data: { name: toolName, args: toolArgs } };
-
-      const tool = config.tools[toolName];
-      if (tool) {
-        try {
-          const toolResult = await tool.execute(toolArgs);
-          config.onLogToolResult?.(toolName, toolResult);
-          yield {
-            type: "tool_result",
-            data: { name: toolName, result: toolResult, success: true },
-          };
-        } catch (error: unknown) {
-          const message =
-            error instanceof Error ? error.message : String(error);
-          config.onLogToolResult?.(toolName, { error: message });
-          yield {
-            type: "tool_result",
-            data: { name: toolName, error: message, success: false },
-          };
+        const tool = config.tools[toolName];
+        if (tool) {
+          try {
+            const toolResult = await tool.execute(toolArgs);
+            config.onLogToolResult?.(toolName, toolResult);
+            yield {
+              type: "tool_result",
+              data: { name: toolName, result: toolResult, success: true },
+            };
+          } catch (error: unknown) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            config.onLogToolResult?.(toolName, { error: message });
+            yield {
+              type: "tool_result",
+              data: { name: toolName, error: message, success: false },
+            };
+          }
         }
       }
     }

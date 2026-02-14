@@ -1,5 +1,6 @@
 import { addCapturedMessage } from "./console-capture";
 import type { ModelMessage } from "ai";
+import { toolRegistry } from "../tools/registry";
 
 export function isHarnessFile(path: string): boolean {
   const fileName = path.split("/").pop() ?? "";
@@ -14,6 +15,8 @@ export function logHarnessRequest(
   if (systemPrompt) {
     addCapturedMessage("log", `[Harness] System Prompt:\n${systemPrompt}`);
   }
+  const toolNames = toolRegistry.list();
+  addCapturedMessage("log", `[Harness] Available Tools: ${toolNames.join(", ")}`);
   addCapturedMessage(
     "log",
     `[Harness] Messages:\n${JSON.stringify(messages, null, 2)}`,

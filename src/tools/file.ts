@@ -4,10 +4,12 @@
  */
 
 import { z } from 'zod';
+import { homedir } from 'os';
+import { join } from 'path';
 import { createAgentTool, toolRegistry } from './registry';
 
 const readFileSchema = z.object({
-  path: z.string().describe('The file path to read'),
+  path: z.string().describe('The file path to read (supports ~ for home directory)'),
   line_ranges: z.array(z.array(z.number())).optional().describe('Line ranges to read (e.g., [[1, 10], [20, 30]])'),
 });
 
@@ -21,6 +23,19 @@ const listDirSchema = z.object({
 });
 
 /**
+ * Resolve path, expanding ~ to home directory
+ */
+function resolvePath(path: string): string {
+  if (path.startsWith('~/')) {
+    return join(homedir(), path.slice(2));
+  }
+  if (path === '~') {
+    return homedir();
+  }
+  return path;
+}
+
+/**
  * Read file tool
  */
 const readFileTool = createAgentTool({
@@ -28,12 +43,17 @@ const readFileTool = createAgentTool({
   description: 'Read the contents of a file, optionally with line ranges',
   parameters: readFileSchema,
   execute: async ({ path, line_ranges }) => {
+    if (!path) {
+      return { error: 'Path is required', success: false };
+    }
+
     try {
-      const file = Bun.file(path);
+      const resolvedPath = resolvePath(path);
+      const file = Bun.file(resolvedPath);
       const exists = await file.exists();
 
       if (!exists) {
-        return { error: 'File not found', path, success: false };
+        return { error: 'File not found', path: resolvedPath, success: false };
       }
 
       let content = await file.text();
@@ -53,12 +73,13 @@ const readFileTool = createAgentTool({
 
       return {
         content,
-        path,
+        path: resolvedPath,
+        originalPath: path,
         size: content.length,
         success: true,
       };
     } catch (error: any) {
-      return { error: error.message, path, success: false };
+      return { error: error.message, path: resolvePath(path), success: false };
     }
   },
 });
@@ -71,15 +92,21 @@ const writeFileTool = createAgentTool({
   description: 'Write content to a file (creates or overwrites)',
   parameters: writeFileSchema,
   execute: async ({ path, content }) => {
+    if (!path) {
+      return { error: 'Path is required', success: false };
+    }
+
     try {
-      await Bun.write(path, content);
+      const resolvedPath = resolvePath(path);
+      await Bun.write(resolvedPath, content);
       return {
-        path,
+        path: resolvedPath,
+        originalPath: path,
         bytesWritten: content.length,
         success: true,
       };
     } catch (error: any) {
-      return { error: error.message, path, success: false };
+      return { error: error.message, path: resolvePath(path), success: false };
     }
   },
 });
@@ -92,14 +119,19 @@ const listDirTool = createAgentTool({
   description: 'List files and directories in a path',
   parameters: listDirSchema,
   execute: async ({ path }) => {
+    if (!path) {
+      return { error: 'Path is required', success: false };
+    }
+
     try {
+      const resolvedPath = resolvePath(path);
       const dir = await Array.fromAsync(
-        new Bun.Glob('*').scan({ cwd: path, onlyFiles: false })
+        new Bun.Glob('*').scan({ cwd: resolvedPath, onlyFiles: false })
       );
 
       const files = await Promise.all(
         dir.map(async (name) => {
-          const fullPath = `${path}/${name}`;
+          const fullPath = join(resolvedPath, name);
           const file = Bun.file(fullPath);
           const isDir = file.size === undefined;
           return {
@@ -111,13 +143,14 @@ const listDirTool = createAgentTool({
       );
 
       return {
-        path,
+        path: resolvedPath,
+        originalPath: path,
         entries: files,
         count: files.length,
         success: true,
       };
     } catch (error: any) {
-      return { error: error.message, path, success: false };
+      return { error: error.message, path: resolvePath(path), success: false };
     }
   },
 });

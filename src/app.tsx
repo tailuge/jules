@@ -391,7 +391,7 @@ export function App(props: AppProps = {}) {
         displayItems={displayItems}
         config={config}
         isStreaming={isStreaming}
-        hideScrollbar={props.skipStartup}
+        hideScrollbar={true}
       />
       <InputArea
         inputValue={inputValue}

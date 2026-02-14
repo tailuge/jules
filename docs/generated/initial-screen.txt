@@ -1,5 +1,5 @@
 
- ▀█▀ ▄▀█ █ █   █ █ █▀▀ █▀▀                                                                     v...
+ ▀█▀ ▄▀█ █ █   █ █ █▀▀ █▀▀
   █  █▀█ █ █▄▄ █▄█ █▄█ ██▄
 
 
@@ -20,4 +20,4 @@
 
 
  >
- Help: /help   Clear: /clear   Models: /models   Console: `   Exit: /exit, /quit, or /q
+ /help /q

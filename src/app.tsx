@@ -1,11 +1,15 @@
 import { useRenderer, useSelectionHandler } from "@opentui/solid";
-import { createSignal, onMount, createMemo, onCleanup } from "solid-js";
+import { createSignal, onMount, createMemo, onCleanup, Show } from "solid-js";
 import { type ModelMessage } from "ai";
 import clipboard from "clipboardy";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
 import type { Config } from "./config/schema";
-import { createSessionFile } from "./utils/session";
+import {
+  createSessionFile,
+  listSessionFiles,
+  type SessionFile,
+} from "./utils/session";
 import { streamChat } from "./agent/loop";
 import { createProvider } from "./agent/provider";
 import {
@@ -23,6 +27,7 @@ import { Header } from "./components/Header";
 import { MessageList } from "./components/MessageList";
 import { InputArea } from "./components/InputArea";
 import { Footer } from "./components/Footer";
+import { SessionSelector } from "./components/SessionSelector";
 
 export interface AppProps {
   skipStartup?: boolean;
@@ -45,6 +50,8 @@ export function App(props: AppProps = {}) {
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
+  const [sessionSelectorOpen, setSessionSelectorOpen] = createSignal(false);
+  const [sessions, setSessions] = createSignal<SessionFile[]>([]);
   const capturedMessages = getCapturedMessages();
   let lastCopiedSelection = "";
 
@@ -193,11 +200,25 @@ export function App(props: AppProps = {}) {
         {
           role: "assistant",
           content:
-            "Available commands:\n  /help   - Show this help message\n  /models - List available models for current provider\n  /clear  - Clear the conversation history\n  /exit   - Exit the application\n  /quit   - Exit the application\n  /q      - Exit the application",
+            "Available commands:\n  /help     - Show this help message\n  /sessions - View past session logs\n  /models   - List available models for current provider\n  /clear    - Clear the conversation history\n  /exit     - Exit the application\n  /quit     - Exit the application\n  /q        - Exit the application",
           timestamp: new Date(),
         },
       ]);
       setInputValue("");
+      return;
+    }
+
+    if (trimmed === "/sessions") {
+      setInputValue("");
+      try {
+        const files = await listSessionFiles();
+        setSessions(files);
+        setSessionSelectorOpen(true);
+      } catch (error: any) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
+        addCapturedMessage("error", `Failed to list sessions: ${message}`);
+      }
       return;
     }
 
@@ -278,6 +299,24 @@ export function App(props: AppProps = {}) {
     }
   };
 
+  const handleSessionSelect = async (path: string) => {
+    try {
+      const content = await Bun.file(path).text();
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Session: ${path}\n\n${content || "(empty file)"}`,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (error: any) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      addCapturedMessage("error", `Failed to read session: ${message}`);
+    }
+    setSessionSelectorOpen(false);
+  };
+
   return (
     <box flexDirection="column" height="100%" width="100%">
       <Header config={config} version={version} />
@@ -294,6 +333,13 @@ export function App(props: AppProps = {}) {
         isStreaming={isStreaming}
       />
       <Footer />
+      <Show when={sessionSelectorOpen()}>
+        <SessionSelector
+          sessions={sessions}
+          onSelect={handleSessionSelect}
+          onClose={() => setSessionSelectorOpen(false)}
+        />
+      </Show>
     </box>
   );
 }

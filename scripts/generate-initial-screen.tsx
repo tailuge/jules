@@ -40,6 +40,24 @@ function buildDocsHtml(screen: string): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${TITLE}</title>
+  <style>
+    body {
+      background-color: black;
+      color: yellow;
+      font-family: monospace;
+      padding: 20px;
+    }
+    pre {
+      font-size: 14px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    @media (max-width: 600px) {
+      pre {
+        font-size: 8px;
+      }
+    }
+  </style>
 </head>
 <body>
   <h1>${TITLE}</h1>

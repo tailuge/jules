@@ -1,4 +1,4 @@
-import { render } from "@opentui/solid";
+import { render, useRenderer } from "@opentui/solid";
 import { createSignal, onMount, createMemo } from "solid-js";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
@@ -16,40 +16,58 @@ import { MessageList } from "./components/MessageList";
 import { InputArea } from "./components/InputArea";
 import { Footer } from "./components/Footer";
 
+console.log("TOP OF FILE - before initConsoleCapture");
 initConsoleCapture();
+console.log("TOP OF FILE - after initConsoleCapture");
 
 function App() {
+  const renderer = useRenderer();
   const [version, setVersion] = createSignal("...");
   const [config, setConfig] = createSignal<Config | null>(null);
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
 
+  console.log("App component created");
+
   const displayItems = createMemo(() => {
-    const chatItems: DisplayItem[] = messages().map((msg) => ({
+    const msgs = messages();
+    const consoleMsgs = getCapturedMessages()();
+    console.log("displayItems recomputed - chat:", msgs.length, "console:", consoleMsgs.length);
+
+    const chatItems: DisplayItem[] = msgs.map((msg) => ({
       type: "chat" as const,
       message: msg,
     }));
-    const consoleItems: DisplayItem[] = getCapturedMessages()().map((msg) => ({
+    const consoleItems: DisplayItem[] = consoleMsgs.map((msg) => ({
       type: "console" as const,
       message: msg,
     }));
-    return [...chatItems, ...consoleItems].sort((a, b) => {
+    const sorted = [...chatItems, ...consoleItems].sort((a, b) => {
       return a.message.timestamp.getTime() - b.message.timestamp.getTime();
     });
+    console.log("displayItems sorted, total:", sorted.length);
+    return sorted;
   });
 
   onMount(async () => {
+    console.log("onMount - loading config...");
     const [v, cfg] = await Promise.all([getVersion(), loadConfig()]);
     setVersion(v);
     setConfig(cfg);
+    console.log("onMount - config loaded:", cfg?.model.name);
   });
 
   const handleSubmit = async () => {
+    console.log("handleSubmit called, inputValue:", inputValue());
     const trimmed = inputValue().trim();
-    if (!trimmed || isStreaming() || !config()) return;
+    if (!trimmed || isStreaming() || !config()) {
+      console.log("handleSubmit early return - trimmed:", !!trimmed, "streaming:", isStreaming(), "config:", !!config());
+      return;
+    }
 
     if (trimmed === "/clear") {
+      console.log("handleSubmit - /clear command");
       setMessages([]);
       clearCapturedMessages();
       setInputValue("");
@@ -57,6 +75,7 @@ function App() {
     }
 
     if (trimmed === "/help") {
+      console.log("handleSubmit - /help command");
       setMessages((prev) => [
         ...prev,
         {
@@ -75,6 +94,7 @@ function App() {
       return;
     }
 
+    console.log("handleSubmit - sending message:", trimmed);
     const userMessage: TimestampedMessage = {
       role: "user",
       content: trimmed,
@@ -85,6 +105,8 @@ function App() {
     setIsStreaming(true);
 
     const assistantIndex = messages().length;
+    console.log("handleSubmit - assistantIndex:", assistantIndex);
+    
     setMessages((prev) => [
       ...prev,
       { role: "assistant", content: "", timestamp: new Date() },
@@ -92,9 +114,13 @@ function App() {
 
     try {
       const provider = createProvider(config()!.model);
+      console.log("handleSubmit - calling streamChat...");
       const generator = streamChat(messages().slice(0, -1), provider);
 
+      let chunkCount = 0;
       for await (const chunk of generator) {
+        chunkCount++;
+        console.log("handleSubmit - chunk", chunkCount, ":", chunk.substring(0, 30));
         setMessages((prev) => {
           const updated = [...prev];
           const lastMsg = updated[assistantIndex];
@@ -107,7 +133,9 @@ function App() {
           return updated;
         });
       }
+      console.log("handleSubmit - streaming complete, chunks:", chunkCount);
     } catch (error: any) {
+      console.log("handleSubmit - error:", error.message);
       setMessages((prev) => {
         const updated = [...prev];
         updated[assistantIndex] = {
@@ -141,4 +169,6 @@ function App() {
   );
 }
 
+console.log("Before render() call");
 render(() => <App />, { exitOnCtrlC: true });
+console.log("After render() call");

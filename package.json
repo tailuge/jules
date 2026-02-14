@@ -12,6 +12,7 @@
     "dev": "bun run --preload @opentui/solid/preload src/index.tsx",
     "start": "bun run --preload @opentui/solid/preload src/index.tsx",
     "build": "bun run build.ts",
+    "docs:screen": "bun run --preload @opentui/solid/preload scripts/generate-initial-screen.tsx",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test": "bun test",

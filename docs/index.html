@@ -1,60 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RLM by conductor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUI Agent CLI</title>
 </head>
-
 <body>
-    <h1>RLM by conductor</h1>
+  <h1>TUI Agent CLI</h1>
+  <h2>Initial Screen</h2>
+  <pre>
+ ▀█▀ ▄▀█ █ █   █ █ █▀▀ █▀▀                                                 v...
+  █  █▀█ █ █▄▄ █▄█ █▄█ ██▄
 
-    <pre>
-        ./rlm.sh -m gemini-2.5-flash-lite "What is 2+2?"
-Starting RLM loop for task: What is 2+2?
---- Iteration 1 ---
-LLM THOUGHT: The user is asking a simple arithmetic question. I can use the `bc` command to calculate this.
-LLM ACTION: echo "2+2" | bc
-Executing: echo "2+2" | bc
---- Iteration 2 ---
-LLM THOUGHT: The `bc` command returned the correct answer, 4. The task is complete.
-LLM ACTION: exit
-RLM loop finished. See 'context.md' for details.
+                                                                              █
+                                                                              █
+                                                                              █
+                                                                              █
+                                                                              █
+                         Welcome to TaiLuGe TUI Agent                         █
+                                                                              █
+                 Type a message to start or /help for commands                ▀
 
 
 
-cat /tmp/jules_llm.log 
 
-[2026-01-25 20:00:32] --invoke-- llm -m "gemini-2.5-flash-lite" -s "You are a recursive LLM agent running in a bash environment.
-The user will provide a task. You must respond with your thought process and an action.
-PROTOCOL:
-THOUGHT: <your reasoning>
-ACTION: <bash command to execute>
 
-If the task is complete, use 'ACTION: exit'.
-Keep actions concise. You have access to standard linux tools.
-Your output will be appended to a context file and fed back to you." (input from stdin)
 
-[2026-01-25 20:00:33] --response--
-THOUGHT: The user is asking a simple arithmetic question. I can use the `bc` command to calculate this.
-ACTION: echo "2+2" | bc
 
-[2026-01-25 20:00:33] --invoke-- llm -m "gemini-2.5-flash-lite" -s "You are a recursive LLM agent running in a bash environment.
-The user will provide a task. You must respond with your thought process and an action.
-PROTOCOL:
-THOUGHT: <your reasoning>
-ACTION: <bash command to execute>
 
-If the task is complete, use 'ACTION: exit'.
-Keep actions concise. You have access to standard linux tools.
-Your output will be appended to a context file and fed back to you." (input from stdin)
 
-[2026-01-25 20:00:34] --response--
-THOUGHT: The `bc` command returned the correct answer, 4. The task is complete.
-ACTION: exit
-
-    </pre>
+ &gt;
+ Help:/help  Clear: /clear  Models:/models  Console:`   Exit:/exit, /quit, or /
+                                                             q
+</pre>
+  <h2>Install</h2>
+  <pre>bun install
+bun run dev</pre>
 </body>
-
 </html>

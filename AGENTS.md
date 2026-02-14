@@ -165,6 +165,16 @@ OpenTUI Solid uses underscores for multi-word components:
 - `<tab_select>` (not `<tab-select>`)
 - `<line_number>` (not `<line-number>`)
 
+### Running JSX Scripts
+
+When running standalone `.tsx` scripts that use JSX, you must preload the OpenTUI Solid JSX runtime:
+
+```bash
+bun run --preload @opentui/solid/preload scripts/example.tsx
+```
+
+Without this preload, you'll get `Export named 'jsxDEV' not found` errors.
+
 ## Documentation Maintenance
 
 - **Subdirectory AGENTS.md**: Each major subdirectory contains its own `AGENTS.md` file describing its contents.

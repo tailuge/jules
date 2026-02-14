@@ -4,7 +4,7 @@
 
 ```text
 
- ▀█▀ ▄▀█ █ █   █ █ █▀▀ █▀▀                                                 v...
+ ▀█▀ ▄▀█ █ █   █ █ █▀▀ █▀▀                                                                     v...
   █  █▀█ █ █▄▄ █▄█ █▄█ ██▄
 
 
@@ -12,10 +12,10 @@
 
 
 
-                          Welcome to TaiLuGe TUI Agent
 
-                 Type a message to start or /help for commands
+                                    Welcome to TaiLuGe TUI Agent
 
+                           Type a message to start or /help for commands
 
 
 
@@ -25,8 +25,7 @@
 
 
  >
- Help:/help  Clear: /clear  Models:/models  Console:`   Exit:/exit, /quit, or /
-                                                             q
+ Help: /help   Clear: /clear   Models: /models   Console: `   Exit: /exit, /quit, or /q
 ```
 
 ## Install

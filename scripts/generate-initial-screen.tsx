@@ -72,7 +72,7 @@ bun run dev</pre>
 }
 
 const testSetup = await testRender(() => <App skipStartup />, {
-  width: 80,
+  width: 100,
   height: 24,
 });
 

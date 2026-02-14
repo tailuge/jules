@@ -18,7 +18,7 @@ export function Footer() {
       <text fg="#444444" marginLeft={2}>
         Exit:{" "}
       </text>
-      <text fg="#666666">/exit, /quit, or /q</text>
+      <text fg="#666666">/exit</text>
     </box>
   );
 }

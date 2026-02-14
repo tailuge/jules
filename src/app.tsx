@@ -29,8 +29,50 @@ import { InputArea } from "./components/InputArea";
 import { Footer } from "./components/Footer";
 import { SessionSelector } from "./components/SessionSelector";
 
+const CONTEXT_FILES = ["soul.md", "memories.md"];
+
+async function loadContextFiles(): Promise<string> {
+  const contexts: string[] = [];
+  for (const filename of CONTEXT_FILES) {
+    try {
+      const file = Bun.file(filename);
+      const exists = await file.exists();
+      if (exists) {
+        const content = await file.text();
+        if (content.trim()) {
+          contexts.push(`\n\n=== ${filename} ===\n${content}`);
+        }
+      }
+    } catch {
+      // File doesn't exist, skip
+    }
+  }
+  return contexts.join("");
+}
+
 export interface AppProps {
   skipStartup?: boolean;
+}
+
+const COMMAND_ALIASES: Record<string, string> = {
+  "/sessions": "/sessions",
+  "/s": "/sessions",
+  "/models": "/models",
+  "/m": "/models",
+  "/clear": "/clear",
+  "/c": "/clear",
+  "/help": "/help",
+  "/h": "/help",
+  "/exit": "/exit",
+  "/ex": "/exit",
+  "/e": "/exit",
+  "/quit": "/quit",
+  "/q": "/quit",
+};
+
+function resolveCommand(input: string): string | null {
+  const normalized = input.trim().toLowerCase();
+  return COMMAND_ALIASES[normalized] || null;
 }
 
 function toModelMessages(messages: TimestampedMessage[]): ModelMessage[] {
@@ -47,6 +89,7 @@ export function App(props: AppProps = {}) {
   const [sessionFilePath, setSessionFilePath] = createSignal<string | null>(
     null,
   );
+  const [contextFiles, setContextFiles] = createSignal("");
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
@@ -109,14 +152,22 @@ export function App(props: AppProps = {}) {
       restoreRuntimeErrorCapture();
     });
 
-    const [v, cfg, sessionPath] = await Promise.all([
+    const [v, cfg, sessionPath, context] = await Promise.all([
       getVersion(),
       loadConfig(),
       createSessionFile(),
+      loadContextFiles(),
     ]);
     setVersion(v);
     setConfig(cfg);
     setSessionFilePath(sessionPath);
+    setContextFiles(context);
+    if (context) {
+      addCapturedMessage(
+        "log",
+        `Loaded context files: ${CONTEXT_FILES.join(", ")}`,
+      );
+    }
     addCapturedMessage(
       "log",
       `Loaded config for ${cfg.model.provider}:${cfg.model.name}`,
@@ -131,19 +182,21 @@ export function App(props: AppProps = {}) {
       return;
     }
 
-    if (trimmed === "/clear") {
+    const resolved = resolveCommand(trimmed);
+
+    if (resolved === "/clear") {
       setMessages([]);
       clearCapturedMessages();
       setInputValue("");
       return;
     }
 
-    if (trimmed === "/exit" || trimmed === "/quit" || trimmed === "/q") {
+    if (resolved === "/exit" || resolved === "/quit" || resolved === "/q") {
       renderer.destroy();
       return;
     }
 
-    if (trimmed === "/models") {
+    if (resolved === "/models") {
       setInputValue("");
       addCapturedMessage(
         "log",
@@ -190,7 +243,7 @@ export function App(props: AppProps = {}) {
       return;
     }
 
-    if (trimmed === "/help") {
+    if (resolved === "/help") {
       setMessages((prev) => [
         ...prev,
         {
@@ -201,7 +254,7 @@ export function App(props: AppProps = {}) {
         {
           role: "assistant",
           content:
-            "Available commands:\n  /help     - Show this help message\n  /sessions - View past session logs\n  /models   - List available models for current provider\n  /clear    - Clear the conversation history\n  /exit     - Exit the application\n  /quit     - Exit the application\n  /q        - Exit the application",
+            "Available commands:\n  /help     - Show this help message\n  /sessions - View past session logs\n  /models   - List available models for current provider\n  /clear    - Clear the conversation history\n  /exit     - Exit the application\n  /quit     - Exit the application\n  /q        - Exit the application\n\nShortcuts:\n  /h /s /m /c /e /ex /q",
           timestamp: new Date(),
         },
       ]);
@@ -209,7 +262,7 @@ export function App(props: AppProps = {}) {
       return;
     }
 
-    if (trimmed === "/sessions") {
+    if (resolved === "/sessions") {
       setInputValue("");
       setInputFocused(false);
       try {
@@ -225,9 +278,14 @@ export function App(props: AppProps = {}) {
       return;
     }
 
+    const contextContent = contextFiles();
+    const userMessageContent = contextContent
+      ? `${contextContent}\n\n---\n\nUser request: ${trimmed}`
+      : trimmed;
+
     const userMessage: TimestampedMessage = {
       role: "user",
-      content: trimmed,
+      content: userMessageContent,
       timestamp: new Date(),
     };
     const currentMessages = messages();

@@ -33,6 +33,27 @@ export interface AppProps {
   skipStartup?: boolean;
 }
 
+const COMMAND_ALIASES: Record<string, string> = {
+  "/sessions": "/sessions",
+  "/s": "/sessions",
+  "/models": "/models",
+  "/m": "/models",
+  "/clear": "/clear",
+  "/c": "/clear",
+  "/help": "/help",
+  "/h": "/help",
+  "/exit": "/exit",
+  "/ex": "/exit",
+  "/e": "/exit",
+  "/quit": "/quit",
+  "/q": "/quit",
+};
+
+function resolveCommand(input: string): string | null {
+  const normalized = input.trim().toLowerCase();
+  return COMMAND_ALIASES[normalized] || null;
+}
+
 function toModelMessages(messages: TimestampedMessage[]): ModelMessage[] {
   return messages.map((message) => ({
     role: message.role,
@@ -131,19 +152,21 @@ export function App(props: AppProps = {}) {
       return;
     }
 
-    if (trimmed === "/clear") {
+    const resolved = resolveCommand(trimmed);
+
+    if (resolved === "/clear") {
       setMessages([]);
       clearCapturedMessages();
       setInputValue("");
       return;
     }
 
-    if (trimmed === "/exit" || trimmed === "/quit" || trimmed === "/q") {
+    if (resolved === "/exit" || resolved === "/quit" || resolved === "/q") {
       renderer.destroy();
       return;
     }
 
-    if (trimmed === "/models") {
+    if (resolved === "/models") {
       setInputValue("");
       addCapturedMessage(
         "log",
@@ -190,7 +213,7 @@ export function App(props: AppProps = {}) {
       return;
     }
 
-    if (trimmed === "/help") {
+    if (resolved === "/help") {
       setMessages((prev) => [
         ...prev,
         {
@@ -201,7 +224,7 @@ export function App(props: AppProps = {}) {
         {
           role: "assistant",
           content:
-            "Available commands:\n  /help     - Show this help message\n  /sessions - View past session logs\n  /models   - List available models for current provider\n  /clear    - Clear the conversation history\n  /exit     - Exit the application\n  /quit     - Exit the application\n  /q        - Exit the application",
+            "Available commands:\n  /help     - Show this help message\n  /sessions - View past session logs\n  /models   - List available models for current provider\n  /clear    - Clear the conversation history\n  /exit     - Exit the application\n  /quit     - Exit the application\n  /q        - Exit the application\n\nShortcuts:\n  /h /s /m /c /e /ex /q",
           timestamp: new Date(),
         },
       ]);
@@ -209,7 +232,7 @@ export function App(props: AppProps = {}) {
       return;
     }
 
-    if (trimmed === "/sessions") {
+    if (resolved === "/sessions") {
       setInputValue("");
       setInputFocused(false);
       try {

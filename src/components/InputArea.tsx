@@ -11,7 +11,7 @@ interface InputAreaProps {
 
 export function InputArea(props: InputAreaProps) {
   return (
-    <box flexDirection="row" padding={1}>
+    <box flexDirection="row" padding={1} backgroundColor="#1a1a1a">
       <text fg="#888888">{"> "}</text>
       <input
         value={props.inputValue()}

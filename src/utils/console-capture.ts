@@ -44,9 +44,7 @@ function formatArgs(args: unknown[]): string {
   return args.map(stringifyArg).join(" ");
 }
 
-function captureMessage(level: LogLevel, ...args: unknown[]): void {
-  debugLog(`captureMessage called: ${level}`);
-  const message = formatArgs(args);
+export function addCapturedMessage(level: LogLevel, message: string): void {
   const timestamp = new Date();
   const entry: CapturedMessage = {
     level,
@@ -63,6 +61,11 @@ function captureMessage(level: LogLevel, ...args: unknown[]): void {
   const logLine = `${timestamp.toISOString()} [${level.toUpperCase()}] ${message}\n`;
   debugLog(`writing to file: ${logLine.trim()}`);
   appendFileSync(LOG_FILE, logLine);
+}
+
+function captureMessage(level: LogLevel, ...args: unknown[]): void {
+  debugLog(`captureMessage called: ${level}`);
+  addCapturedMessage(level, formatArgs(args));
 }
 
 export function initConsoleCapture(): void {

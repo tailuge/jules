@@ -371,4 +371,21 @@ describe("streamChat", () => {
       expect((error as Error).message).toBe("Stream failed");
     }
   });
+
+  test("falls back to final text when textStream is empty", async () => {
+    mockStreamText.mockReturnValue({
+      textStream: (async function* () {})(),
+      text: Promise.resolve("Final response"),
+    });
+
+    const messages = [{ role: "user" as const, content: "Hi" }];
+    const generator = streamChat(messages, mockProvider);
+
+    const chunks: string[] = [];
+    for await (const chunk of generator) {
+      chunks.push(chunk);
+    }
+
+    expect(chunks).toEqual(["Final response"]);
+  });
 });

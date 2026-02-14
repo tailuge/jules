@@ -1,5 +1,6 @@
-import { render, useRenderer } from "@opentui/solid";
+import { render } from "@opentui/solid";
 import { createSignal, onMount, createMemo } from "solid-js";
+import { type ModelMessage } from "ai";
 import { getVersion } from "./utils/version";
 import { loadConfig } from "./config/loader";
 import type { Config } from "./config/schema";
@@ -7,6 +8,7 @@ import { streamChat } from "./agent/loop";
 import { createProvider } from "./agent/provider";
 import {
   initConsoleCapture,
+  addCapturedMessage,
   getCapturedMessages,
   clearCapturedMessages,
 } from "./utils/console-capture";
@@ -16,25 +18,25 @@ import { MessageList } from "./components/MessageList";
 import { InputArea } from "./components/InputArea";
 import { Footer } from "./components/Footer";
 
-console.log("TOP OF FILE - before initConsoleCapture");
 initConsoleCapture();
-console.log("TOP OF FILE - after initConsoleCapture");
+
+function toModelMessages(messages: TimestampedMessage[]): ModelMessage[] {
+  return messages.map((message) => ({
+    role: message.role,
+    content: message.content,
+  })) as ModelMessage[];
+}
 
 function App() {
-  const renderer = useRenderer();
   const [version, setVersion] = createSignal("...");
   const [config, setConfig] = createSignal<Config | null>(null);
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
 
-  console.log("App component created");
-
   const displayItems = createMemo(() => {
     const msgs = messages();
     const consoleMsgs = getCapturedMessages()();
-    console.log("displayItems recomputed - chat:", msgs.length, "console:", consoleMsgs.length);
-
     const chatItems: DisplayItem[] = msgs.map((msg) => ({
       type: "chat" as const,
       message: msg,
@@ -46,28 +48,27 @@ function App() {
     const sorted = [...chatItems, ...consoleItems].sort((a, b) => {
       return a.message.timestamp.getTime() - b.message.timestamp.getTime();
     });
-    console.log("displayItems sorted, total:", sorted.length);
     return sorted;
   });
 
   onMount(async () => {
-    console.log("onMount - loading config...");
     const [v, cfg] = await Promise.all([getVersion(), loadConfig()]);
     setVersion(v);
     setConfig(cfg);
-    console.log("onMount - config loaded:", cfg?.model.name);
+    addCapturedMessage(
+      "log",
+      `Loaded config for ${cfg.model.provider}:${cfg.model.name}`,
+    );
   });
 
   const handleSubmit = async () => {
-    console.log("handleSubmit called, inputValue:", inputValue());
     const trimmed = inputValue().trim();
-    if (!trimmed || isStreaming() || !config()) {
-      console.log("handleSubmit early return - trimmed:", !!trimmed, "streaming:", isStreaming(), "config:", !!config());
+    const activeConfig = config();
+    if (!trimmed || isStreaming() || !activeConfig) {
       return;
     }
 
     if (trimmed === "/clear") {
-      console.log("handleSubmit - /clear command");
       setMessages([]);
       clearCapturedMessages();
       setInputValue("");
@@ -75,7 +76,6 @@ function App() {
     }
 
     if (trimmed === "/help") {
-      console.log("handleSubmit - /help command");
       setMessages((prev) => [
         ...prev,
         {
@@ -94,38 +94,47 @@ function App() {
       return;
     }
 
-    console.log("handleSubmit - sending message:", trimmed);
     const userMessage: TimestampedMessage = {
       role: "user",
       content: trimmed,
       timestamp: new Date(),
     };
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    setIsStreaming(true);
+    const currentMessages = messages();
+    const conversationForModel = toModelMessages([...currentMessages, userMessage]);
 
-    const assistantIndex = messages().length;
-    console.log("handleSubmit - assistantIndex:", assistantIndex);
-    
     setMessages((prev) => [
       ...prev,
+      userMessage,
       { role: "assistant", content: "", timestamp: new Date() },
     ]);
+    setInputValue("");
+    setIsStreaming(true);
+    addCapturedMessage(
+      "log",
+      `Request started with ${activeConfig.model.provider}:${activeConfig.model.name}`,
+    );
 
     try {
-      const provider = createProvider(config()!.model);
-      console.log("handleSubmit - calling streamChat...");
-      const generator = streamChat(messages().slice(0, -1), provider);
-
-      let chunkCount = 0;
-      for await (const chunk of generator) {
-        chunkCount++;
-        console.log("handleSubmit - chunk", chunkCount, ":", chunk.substring(0, 30));
+      const provider = createProvider(activeConfig.model);
+      let hasResponseText = false;
+      for await (const chunk of streamChat(
+        conversationForModel,
+        provider,
+        activeConfig.agent.systemPrompt,
+      )) {
+        if (!chunk) {
+          continue;
+        }
+        hasResponseText = true;
         setMessages((prev) => {
+          if (prev.length === 0) {
+            return prev;
+          }
           const updated = [...prev];
-          const lastMsg = updated[assistantIndex];
+          const lastIndex = updated.length - 1;
+          const lastMsg = updated[lastIndex];
           if (lastMsg && lastMsg.role === "assistant") {
-            updated[assistantIndex] = {
+            updated[lastIndex] = {
               ...lastMsg,
               content: (lastMsg.content as string) + chunk,
             };
@@ -133,14 +142,23 @@ function App() {
           return updated;
         });
       }
-      console.log("handleSubmit - streaming complete, chunks:", chunkCount);
+      if (!hasResponseText) {
+        addCapturedMessage("warn", "Model returned an empty response.");
+      }
+      addCapturedMessage("log", "Request completed.");
     } catch (error: any) {
-      console.log("handleSubmit - error:", error.message);
+      const message =
+        error instanceof Error ? error.message : "Unknown streaming error";
+      addCapturedMessage("error", `Request failed: ${message}`);
       setMessages((prev) => {
+        if (prev.length === 0) {
+          return prev;
+        }
         const updated = [...prev];
-        updated[assistantIndex] = {
+        const lastIndex = updated.length - 1;
+        updated[lastIndex] = {
           role: "assistant",
-          content: `Error: ${error.message}`,
+          content: `Error: ${message}`,
           timestamp: new Date(),
         };
         return updated;
@@ -169,6 +187,4 @@ function App() {
   );
 }
 
-console.log("Before render() call");
 render(() => <App />, { exitOnCtrlC: true });
-console.log("After render() call");

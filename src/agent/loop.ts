@@ -210,7 +210,17 @@ export async function* streamChat(
     messages: allMessages,
   });
 
+  let emitted = false;
   for await (const chunk of result.textStream) {
+    emitted = true;
     yield chunk;
+  }
+
+  const textPromise = (result as unknown as { text?: PromiseLike<string> }).text;
+  if (!emitted && textPromise) {
+    const fullText = await textPromise;
+    if (fullText) {
+      yield fullText;
+    }
   }
 }

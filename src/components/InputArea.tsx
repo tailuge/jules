@@ -5,6 +5,8 @@ interface InputAreaProps {
   setInputValue: Setter<string>;
   handleSubmit: (event: any) => void;
   isStreaming: Accessor<boolean>;
+  inputFocused: Accessor<boolean>;
+  setInputFocused: Setter<boolean>;
 }
 
 export function InputArea(props: InputAreaProps) {
@@ -15,7 +17,7 @@ export function InputArea(props: InputAreaProps) {
         value={props.inputValue()}
         onInput={props.setInputValue}
         onSubmit={props.handleSubmit as any}
-        focused={!props.isStreaming()}
+        focused={props.inputFocused() && !props.isStreaming()}
         flexGrow={1}
       />
       {props.isStreaming() && <text fg="#888888"> streaming...</text>}

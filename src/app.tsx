@@ -50,6 +50,7 @@ export function App(props: AppProps = {}) {
   const [inputValue, setInputValue] = createSignal("");
   const [messages, setMessages] = createSignal<TimestampedMessage[]>([]);
   const [isStreaming, setIsStreaming] = createSignal(false);
+  const [inputFocused, setInputFocused] = createSignal(true);
   const [sessionSelectorOpen, setSessionSelectorOpen] = createSignal(false);
   const [sessions, setSessions] = createSignal<SessionFile[]>([]);
   const capturedMessages = getCapturedMessages();
@@ -210,6 +211,7 @@ export function App(props: AppProps = {}) {
 
     if (trimmed === "/sessions") {
       setInputValue("");
+      setInputFocused(false);
       try {
         const files = await listSessionFiles();
         setSessions(files);
@@ -218,6 +220,7 @@ export function App(props: AppProps = {}) {
         const message =
           error instanceof Error ? error.message : "Unknown error";
         addCapturedMessage("error", `Failed to list sessions: ${message}`);
+        setInputFocused(true);
       }
       return;
     }
@@ -315,6 +318,12 @@ export function App(props: AppProps = {}) {
       addCapturedMessage("error", `Failed to read session: ${message}`);
     }
     setSessionSelectorOpen(false);
+    setInputFocused(true);
+  };
+
+  const handleSessionSelectorClose = () => {
+    setSessionSelectorOpen(false);
+    setInputFocused(true);
   };
 
   return (
@@ -331,13 +340,15 @@ export function App(props: AppProps = {}) {
         setInputValue={setInputValue}
         handleSubmit={handleSubmit}
         isStreaming={isStreaming}
+        inputFocused={inputFocused}
+        setInputFocused={setInputFocused}
       />
       <Footer />
       <Show when={sessionSelectorOpen()}>
         <SessionSelector
           sessions={sessions}
           onSelect={handleSessionSelect}
-          onClose={() => setSessionSelectorOpen(false)}
+          onClose={handleSessionSelectorClose}
         />
       </Show>
     </box>

@@ -164,3 +164,8 @@ OpenTUI Solid uses underscores for multi-word components:
 - `<ascii_font>` (not `<ascii-font>`)
 - `<tab_select>` (not `<tab-select>`)
 - `<line_number>` (not `<line-number>`)
+
+## Documentation Maintenance
+
+- **Subdirectory AGENTS.md**: Each major subdirectory contains its own `AGENTS.md` file describing its contents.
+- **Maintenance**: When adding new files, changing the purpose of a directory, or creating new subdirectories, ensure the corresponding `AGENTS.md` files are updated or created.

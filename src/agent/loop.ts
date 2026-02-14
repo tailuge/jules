@@ -113,7 +113,8 @@ export async function* agentLoop(
                 timestamp: Date.now(),
               };
             } catch (error: unknown) {
-              const message = error instanceof Error ? error.message : String(error);
+              const message =
+                error instanceof Error ? error.message : String(error);
               yield {
                 type: "tool_result",
                 data: {
@@ -192,6 +193,9 @@ export async function simpleAgentCall(
   return result.text;
 }
 
+/**
+ * @deprecated Use streamChatWithTools instead for tool support and event-based streaming
+ */
 export async function* streamChat(
   messages: ModelMessage[],
   provider: Provider,
@@ -211,7 +215,8 @@ export async function* streamChat(
   });
 
   let emitted = false;
-  const textStream = (result as { textStream?: AsyncIterable<string> }).textStream;
+  const textStream = (result as { textStream?: AsyncIterable<string> })
+    .textStream;
   if (
     textStream &&
     typeof (textStream as { [Symbol.asyncIterator]?: unknown })[
@@ -224,11 +229,119 @@ export async function* streamChat(
     }
   }
 
-  const finalText = await (result as { text?: string | PromiseLike<string> }).text;
+  const finalText = await (result as { text?: string | PromiseLike<string> })
+    .text;
   if (!emitted && typeof finalText === "string") {
     const fullText = finalText;
     if (fullText) {
       yield fullText;
     }
   }
+}
+
+export interface StreamChatEvent {
+  type: "text" | "tool_call" | "tool_result" | "done";
+  data: any;
+}
+
+export interface StreamChatConfig {
+  tools: Record<string, AgentTool>;
+  onLogRequest?: (
+    systemPrompt: string | undefined,
+    messages: ModelMessage[],
+  ) => void;
+  onLogToolCall?: (name: string, args: Record<string, unknown>) => void;
+  onLogToolResult?: (name: string, result: unknown) => void;
+  onLogResponse?: (response: {
+    text?: string;
+    toolCalls?: Array<{ name: string; args: Record<string, unknown> }>;
+  }) => void;
+}
+
+export async function* streamChatWithTools(
+  messages: ModelMessage[],
+  provider: Provider,
+  systemPrompt: string | undefined,
+  config: StreamChatConfig,
+): AsyncGenerator<StreamChatEvent> {
+  const allMessages: ModelMessage[] = [];
+
+  if (systemPrompt) {
+    allMessages.push({ role: "system", content: systemPrompt });
+  }
+
+  allMessages.push(...messages);
+
+  config.onLogRequest?.(systemPrompt, allMessages);
+
+  const toolsObject = Object.fromEntries(
+    Object.entries(config.tools).map(([name, tool]) => [
+      name,
+      {
+        description: tool.description,
+        parameters: tool.parameters,
+      },
+    ]),
+  );
+
+  const result = await streamText({
+    model: provider.model,
+    messages: allMessages,
+    tools: Object.keys(config.tools).length > 0 ? toolsObject : undefined,
+  } as any);
+
+  const toolCalls: Array<{ name: string; args: Record<string, unknown> }> = [];
+  let fullText = "";
+
+  const textStream = (result as { textStream?: AsyncIterable<string> })
+    .textStream;
+  if (
+    textStream &&
+    typeof (textStream as { [Symbol.asyncIterator]?: unknown })[
+      Symbol.asyncIterator
+    ] === "function"
+  ) {
+    for await (const chunk of textStream) {
+      fullText += chunk;
+      yield { type: "text", data: chunk };
+    }
+  }
+
+  const resultData = result as any;
+  if (resultData.toolCalls && resultData.toolCalls.length > 0) {
+    for (const tc of resultData.toolCalls) {
+      const toolName = tc.toolName as string;
+      const toolArgs = tc.args ?? {};
+      toolCalls.push({ name: toolName, args: toolArgs });
+
+      config.onLogToolCall?.(toolName, toolArgs);
+      yield { type: "tool_call", data: { name: toolName, args: toolArgs } };
+
+      const tool = config.tools[toolName];
+      if (tool) {
+        try {
+          const toolResult = await tool.execute(toolArgs);
+          config.onLogToolResult?.(toolName, toolResult);
+          yield {
+            type: "tool_result",
+            data: { name: toolName, result: toolResult, success: true },
+          };
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          config.onLogToolResult?.(toolName, { error: message });
+          yield {
+            type: "tool_result",
+            data: { name: toolName, error: message, success: false },
+          };
+        }
+      }
+    }
+  }
+
+  config.onLogResponse?.({
+    text: fullText || undefined,
+    toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+  });
+  yield { type: "done", data: { text: fullText, toolCalls } };
 }

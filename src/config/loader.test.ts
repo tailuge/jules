@@ -23,6 +23,9 @@ describe("configSchema", () => {
         showTokenCount: true,
         showToolCalls: true,
       },
+      harness: {
+        enabled: true,
+      },
     };
 
     const result = configSchema.safeParse(validConfig);

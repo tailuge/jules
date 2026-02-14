@@ -3,11 +3,18 @@
  * Zod schema for config validation
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export const configSchema = z.object({
   model: z.object({
-    provider: z.enum(['anthropic', 'openai', 'google', 'groq', 'mistral', 'custom']),
+    provider: z.enum([
+      "anthropic",
+      "openai",
+      "google",
+      "groq",
+      "mistral",
+      "custom",
+    ]),
     name: z.string(),
     apiKey: z.string().optional(),
     baseUrl: z.string().optional(),
@@ -20,18 +27,29 @@ export const configSchema = z.object({
   }),
 
   tools: z.object({
-    enabled: z.array(z.string()).default(['shell', 'read_file', 'write_file', 'list_dir']),
-    shell: z.object({
-      allowedCommands: z.array(z.string()).optional(),
-      sandbox: z.boolean().default(true),
-    }).optional(),
+    enabled: z
+      .array(z.string())
+      .default(["shell", "read_file", "write_file", "list_dir"]),
+    shell: z
+      .object({
+        allowedCommands: z.array(z.string()).optional(),
+        sandbox: z.boolean().default(true),
+      })
+      .optional(),
   }),
 
   tui: z.object({
-    theme: z.enum(['dark', 'light']).default('dark'),
+    theme: z.enum(["dark", "light"]).default("dark"),
     showTokenCount: z.boolean().default(true),
     showToolCalls: z.boolean().default(true),
   }),
+
+  harness: z
+    .object({
+      enabled: z.boolean().default(true),
+    })
+    .optional()
+    .default({ enabled: true }),
 });
 
 export type Config = z.infer<typeof configSchema>;
@@ -41,22 +59,25 @@ export type Config = z.infer<typeof configSchema>;
  */
 export const defaultConfig: Config = {
   model: {
-    provider: 'anthropic',
-    name: 'claude-sonnet-4-20250514',
+    provider: "anthropic",
+    name: "claude-sonnet-4-20250514",
   },
   agent: {
     maxIterations: 10,
     temperature: 0.7,
   },
   tools: {
-    enabled: ['shell', 'read_file', 'write_file', 'list_dir'],
+    enabled: ["shell", "read_file", "write_file", "list_dir"],
     shell: {
       sandbox: true,
     },
   },
   tui: {
-    theme: 'dark',
+    theme: "dark",
     showTokenCount: true,
     showToolCalls: true,
+  },
+  harness: {
+    enabled: true,
   },
 };

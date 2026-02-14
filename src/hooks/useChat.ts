@@ -1,9 +1,17 @@
 import { createSignal, type Accessor, type Setter } from "solid-js";
 import { type ModelMessage } from "ai";
 import { type TimestampedMessage, type Config } from "@/types";
-import { streamChat } from "@/agent/loop";
+import { streamChatWithTools } from "@/agent/loop";
 import { createProvider } from "@/agent/provider";
 import { addCapturedMessage } from "@/utils/console-capture";
+import { getHarnessPrompt } from "@/agent/harness_prompt";
+import {
+  logHarnessRequest,
+  logHarnessToolCall,
+  logHarnessToolResult,
+  logHarnessResponse,
+} from "@/utils/harness-logger";
+import { toolRegistry } from "@/tools/registry";
 
 export interface UseChatReturn {
   messages: Accessor<TimestampedMessage[]>;
@@ -63,31 +71,49 @@ export function useChat(): UseChatReturn {
     try {
       const provider = createProvider(config.model);
       let hasResponseText = false;
+      const isHarnessEnabled = config.harness?.enabled !== false;
+      let fullResponse = "";
 
-      for await (const chunk of streamChat(
+      const harnessPrompt = isHarnessEnabled ? getHarnessPrompt() : "";
+      const userSystemPrompt = config.agent.systemPrompt || "";
+      const combinedSystemPrompt = harnessPrompt
+        ? userSystemPrompt
+          ? `${harnessPrompt}\n\n${userSystemPrompt}`
+          : harnessPrompt
+        : userSystemPrompt;
+
+      for await (const event of streamChatWithTools(
         conversationForModel,
         provider,
-        config.agent.systemPrompt,
+        combinedSystemPrompt,
+        {
+          tools: toolRegistry.getAll(),
+          onLogRequest: isHarnessEnabled ? logHarnessRequest : undefined,
+          onLogToolCall: isHarnessEnabled ? logHarnessToolCall : undefined,
+          onLogToolResult: isHarnessEnabled ? logHarnessToolResult : undefined,
+          onLogResponse: isHarnessEnabled ? logHarnessResponse : undefined,
+        },
       )) {
-        if (!chunk) {
-          continue;
+        if (event.type === "text" && event.data) {
+          hasResponseText = true;
+          fullResponse += event.data;
+          setMessages((prev) => {
+            if (prev.length === 0) return prev;
+            const updated = [...prev];
+            const lastIndex = updated.length - 1;
+            const lastMsg = updated[lastIndex];
+            if (lastMsg && lastMsg.role === "assistant") {
+              updated[lastIndex] = {
+                ...lastMsg,
+                content: (lastMsg.content as string) + event.data,
+              };
+            }
+            return updated;
+          });
         }
-        hasResponseText = true;
-        setMessages((prev) => {
-          if (prev.length === 0) {
-            return prev;
-          }
-          const updated = [...prev];
-          const lastIndex = updated.length - 1;
-          const lastMsg = updated[lastIndex];
-          if (lastMsg && lastMsg.role === "assistant") {
-            updated[lastIndex] = {
-              ...lastMsg,
-              content: (lastMsg.content as string) + chunk,
-            };
-          }
-          return updated;
-        });
+        if (event.type === "done") {
+          break;
+        }
       }
 
       if (!hasResponseText) {

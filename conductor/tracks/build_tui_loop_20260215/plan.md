@@ -1,13 +1,13 @@
 # Implementation Plan - Build the core four-panel TUI layout and basic agentic loop shell.
 
-## Phase 1: TUI Foundation
+## Phase 1: TUI Foundation [checkpoint: c173ec3]
 - [x] Task: Implement responsive flex layout shell (b609680)
     - [x] Write tests for layout resizing
     - [x] Create core container components
 - [x] Task: Create the four panels (Memory, Goals, Self, Activity) (3a00d92)
     - [x] Write tests for panel state updates
     - [x] Implement individual panel components
-- [ ] Task: Conductor - User Manual Verification 'TUI Foundation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'TUI Foundation' (Protocol in workflow.md) (c173ec3)
 
 ## Phase 2: Agentic Loop & Tools
 - [ ] Task: Setup model-agnostic provider interface

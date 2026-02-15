@@ -6,3 +6,8 @@ export const providerColors: Record<string, string> = {
   mistral: "#FF7000",
   custom: "#9B59B6",
 };
+
+export const SHELL_TOOL = {
+  DEFAULT_TIMEOUT_MS: 30000,
+  MAX_BUFFER_BYTES: 1024 * 1024,
+} as const;

@@ -5,10 +5,11 @@
 
 import { z } from 'zod';
 import { createAgentTool, toolRegistry } from './registry';
+import { SHELL_TOOL } from '@/constants';
 
 const shellToolSchema = z.object({
   command: z.string().describe('The shell command to execute'),
-  timeout: z.number().optional().default(30000).describe('Timeout in milliseconds'),
+  timeout: z.number().optional().default(SHELL_TOOL.DEFAULT_TIMEOUT_MS).describe('Timeout in milliseconds'),
 });
 
 /**
@@ -20,7 +21,7 @@ async function executeShell(args: z.infer<typeof shellToolSchema>): Promise<any>
   try {
     const result = Bun.spawnSync(['sh', '-c', command], {
       timeout,
-      maxBuffer: 1024 * 1024, // 1MB
+      maxBuffer: SHELL_TOOL.MAX_BUFFER_BYTES, // 1MB
     });
 
     return {

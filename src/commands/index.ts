@@ -19,6 +19,8 @@ export class CommandRegistry {
   }
 }
 
+let commandRegistryInstance: CommandRegistry | null = null;
+
 export function createCommandRegistry(): CommandRegistry {
   const registry = new CommandRegistry();
 
@@ -31,8 +33,14 @@ export function createCommandRegistry(): CommandRegistry {
   return registry;
 }
 
+export function getCommandRegistry(): CommandRegistry {
+  if (!commandRegistryInstance) {
+    commandRegistryInstance = createCommandRegistry();
+  }
+  return commandRegistryInstance;
+}
+
 export function resolveCommand(input: string): string | null {
-  const registry = createCommandRegistry();
-  const command = registry.resolve(input);
+  const command = getCommandRegistry().resolve(input);
   return command ? command.name : null;
 }

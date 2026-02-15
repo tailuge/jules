@@ -4,9 +4,9 @@
 - [x] Task: Implement responsive flex layout shell (b609680)
     - [x] Write tests for layout resizing
     - [x] Create core container components
-- [ ] Task: Create the four panels (Memory, Goals, Self, Activity)
-    - [ ] Write tests for panel state updates
-    - [ ] Implement individual panel components
+- [x] Task: Create the four panels (Memory, Goals, Self, Activity) (3a00d92)
+    - [x] Write tests for panel state updates
+    - [x] Implement individual panel components
 - [ ] Task: Conductor - User Manual Verification 'TUI Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Agentic Loop & Tools

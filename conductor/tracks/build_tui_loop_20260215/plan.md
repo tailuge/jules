@@ -1,9 +1,9 @@
 # Implementation Plan - Build the core four-panel TUI layout and basic agentic loop shell.
 
 ## Phase 1: TUI Foundation
-- [ ] Task: Implement responsive flex layout shell
-    - [ ] Write tests for layout resizing
-    - [ ] Create core container components
+- [x] Task: Implement responsive flex layout shell (b609680)
+    - [x] Write tests for layout resizing
+    - [x] Create core container components
 - [ ] Task: Create the four panels (Memory, Goals, Self, Activity)
     - [ ] Write tests for panel state updates
     - [ ] Implement individual panel components

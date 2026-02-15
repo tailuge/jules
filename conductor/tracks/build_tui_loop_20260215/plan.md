@@ -13,9 +13,9 @@
 - [x] Task: Setup model-agnostic provider interface (f3de845)
     - [x] Write tests for provider abstraction
     - [x] Implement Vercel AI SDK integration
-- [ ] Task: Implement Shell Tool
-    - [ ] Write tests for shell command execution safety
-    - [ ] Implement file read/write and command execution tools
+- [x] Task: Implement Shell Tool (d937d9e)
+    - [x] Write tests for shell command execution safety
+    - [x] Implement file read/write and command execution tools
 - [ ] Task: Implement Basic Agentic Loop
     - [ ] Write tests for loop execution and tool usage
     - [ ] Connect agent output to the Activity panel and update state panels

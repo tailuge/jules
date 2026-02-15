@@ -15,7 +15,7 @@ import { SessionSelector } from "./components/SessionSelector";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { useChat } from "./hooks/useChat";
 import { useSession } from "./hooks/useSession";
-import { createCommandRegistry, type CommandContext } from "./commands";
+import { createCommandRegistry, getCommandRegistry, type CommandContext } from "./commands";
 
 export interface AppProps {
   skipStartup?: boolean;
@@ -26,7 +26,7 @@ function AppContent() {
   const context = useAppContext();
   const chat = useChat();
   const session = useSession();
-  const commandRegistry = createCommandRegistry();
+  const commandRegistry = getCommandRegistry();
 
   const [inputValue, setInputValue] = createSignal("");
   const [inputFocused, setInputFocused] = createSignal(true);

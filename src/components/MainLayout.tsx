@@ -32,13 +32,13 @@ export function MainLayout(props: MainLayoutProps) {
         flexBasis={orientation() === "wide" ? "40%" : "50%"}
         flexShrink={0}
       >
-        <box flexGrow={1} borderStyle="single" title="Memory">
+        <box flexGrow={1} flexBasis="0" borderStyle="single" title="Memory">
           {props.memory}
         </box>
-        <box flexGrow={1} borderStyle="single" title="Goals">
+        <box flexGrow={1} flexBasis="0" borderStyle="single" title="Goals">
           {props.goals}
         </box>
-        <box flexGrow={1} borderStyle="single" title="Self">
+        <box flexGrow={1} flexBasis="0" borderStyle="single" title="Self">
           {props.self}
         </box>
       </box>

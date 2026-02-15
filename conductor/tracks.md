@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Build the core four-panel TUI layout and basic agentic loop shell.**
+- [x] **Track: Build the core four-panel TUI layout and basic agentic loop shell.**
   *Link: [./tracks/build_tui_loop_20260215/](./tracks/build_tui_loop_20260215/)*

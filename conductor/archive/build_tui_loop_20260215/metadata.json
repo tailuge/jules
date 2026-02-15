@@ -1,0 +1,8 @@
+{
+  "track_id": "build_tui_loop_20260215",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-15T12:00:00Z",
+  "updated_at": "2026-02-15T12:00:00Z",
+  "description": "Build the core four-panel TUI layout and basic agentic loop shell."
+}

@@ -9,7 +9,7 @@
     - [x] Implement individual panel components
 - [x] Task: Conductor - User Manual Verification 'TUI Foundation' (Protocol in workflow.md) (c173ec3)
 
-## Phase 2: Agentic Loop & Tools
+## Phase 2: Agentic Loop & Tools [checkpoint: 317c253]
 - [x] Task: Setup model-agnostic provider interface (f3de845)
     - [x] Write tests for provider abstraction
     - [x] Implement Vercel AI SDK integration
@@ -19,4 +19,4 @@
 - [x] Task: Implement Basic Agentic Loop (3867b42)
     - [x] Write tests for loop execution and tool usage
     - [x] Connect agent output to the Activity panel and update state panels
-- [ ] Task: Conductor - User Manual Verification 'Agentic Loop & Tools' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Agentic Loop & Tools' (Protocol in workflow.md) (317c253)

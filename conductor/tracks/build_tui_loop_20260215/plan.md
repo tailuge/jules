@@ -10,9 +10,9 @@
 - [x] Task: Conductor - User Manual Verification 'TUI Foundation' (Protocol in workflow.md) (c173ec3)
 
 ## Phase 2: Agentic Loop & Tools
-- [ ] Task: Setup model-agnostic provider interface
-    - [ ] Write tests for provider abstraction
-    - [ ] Implement Vercel AI SDK integration
+- [x] Task: Setup model-agnostic provider interface (f3de845)
+    - [x] Write tests for provider abstraction
+    - [x] Implement Vercel AI SDK integration
 - [ ] Task: Implement Shell Tool
     - [ ] Write tests for shell command execution safety
     - [ ] Implement file read/write and command execution tools

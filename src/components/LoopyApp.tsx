@@ -23,6 +23,14 @@ function LoopyAppContent() {
   const { state, setState } = createPanelState();
   let loopStarted = false;
 
+  const [activityInput, setActivityInput] = createSignal("");
+  const [activityFocused, setActivityFocused] = createSignal(true);
+
+  const handleActivitySubmit = () => {
+    // Phase 2: Logic for processing input
+    setActivityInput("");
+  };
+
   createEffect(() => {
     const config = context.config();
     if (config && !loopStarted) {
@@ -79,7 +87,15 @@ function LoopyAppContent() {
       memory={<MemoryPanel memory={state.memory} />}
       goals={<GoalsPanel goals={state.goals} />}
       self={<SelfPanel self={state.self} />}
-      activity={<ActivityPanel activity={state.activity} />}
+      activity={
+        <ActivityPanel
+          activity={state.activity}
+          inputValue={activityInput}
+          onInput={setActivityInput}
+          onSubmit={handleActivitySubmit}
+          inputFocused={activityFocused}
+        />
+      }
     />
   );
 }

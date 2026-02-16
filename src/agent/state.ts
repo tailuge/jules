@@ -17,6 +17,7 @@ export interface PanelState {
   goals: Goal[];
   self: string;
   activity: ActivityLog[];
+  isThinking: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export function createPanelState() {
     goals: [],
     self: "",
     activity: [],
+    isThinking: false,
   });
 
   return { state, setState };

@@ -24,6 +24,7 @@ export interface AgentLoopConfig {
   tools: Record<string, AgentTool>;
   maxIterations: number;
   systemPrompt?: string;
+  userInputQueue?: string[];
   onToolCall?: (name: string, args: any) => void;
   onToken?: (token: string) => void;
   onStep?: (step: number, total: number) => void;
@@ -57,6 +58,18 @@ export async function* agentLoop(
     iteration++;
     config.onStep?.(iteration, config.maxIterations);
 
+    // Check for new user input from the queue
+    if (config.userInputQueue && config.userInputQueue.length > 0) {
+      while (config.userInputQueue.length > 0) {
+        const nextInput = config.userInputQueue.shift();
+        if (nextInput) {
+          messages.push({ role: "user", content: nextInput });
+          // Reset or extend iteration count when new input arrives
+          iteration = 1;
+        }
+      }
+    }
+
     try {
       const toolsObject = Object.fromEntries(
         Object.entries(config.tools).map(([name, tool]) => [
@@ -68,6 +81,12 @@ export async function* agentLoop(
         ]),
       );
 
+      yield {
+        type: "thinking",
+        data: { iteration },
+        timestamp: Date.now(),
+      };
+
       const result = await generateText({
         model: config.provider.model,
         messages,
@@ -75,6 +94,7 @@ export async function* agentLoop(
       } as any);
 
       if (result.text) {
+        messages.push({ role: "assistant", content: result.text });
         yield {
           type: "text",
           data: result.text,
@@ -139,6 +159,10 @@ export async function* agentLoop(
           content: toolCallContent as any,
         });
 
+        continue;
+      }
+
+      if (config.userInputQueue && config.userInputQueue.length > 0) {
         continue;
       }
 

@@ -5,6 +5,7 @@ import { ActivityInput } from "./ActivityInput";
 
 interface ActivityPanelProps {
   activity: ActivityLog[];
+  isThinking: Accessor<boolean>;
   inputValue?: Accessor<string>;
   onInput?: Setter<string>;
   onSubmit?: () => void;
@@ -38,6 +39,7 @@ export function ActivityPanel(props: ActivityPanelProps) {
           onInput={props.onInput!}
           onSubmit={props.onSubmit!}
           focused={props.inputFocused || (() => false)}
+          isThinking={props.isThinking}
         />
       </Show>
     </box>

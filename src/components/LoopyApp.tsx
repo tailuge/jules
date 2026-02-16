@@ -22,6 +22,7 @@ function LoopyAppContent() {
 
   const { state, setState } = createPanelState();
   let loopStarted = false;
+  const userInputQueue: string[] = [];
 
   const [activityInput, setActivityInput] = createSignal("");
   const [activityFocused, setActivityFocused] = createSignal(true);
@@ -33,7 +34,7 @@ function LoopyAppContent() {
         ...a,
         { timestamp: Date.now(), type: "user", message: trimmed },
       ]);
-      // TODO: In Phase 3, we will pass this to the agent loop
+      userInputQueue.push(trimmed);
       setActivityInput("");
     }
   };
@@ -78,7 +79,7 @@ function LoopyAppContent() {
         baseUrl: config.model.baseUrl,
       });
 
-      await runLoopy(prompt, provider, { state, setState }, allTools);
+      await runLoopy(prompt, provider, { state, setState }, allTools, 10, userInputQueue);
     } catch (error: any) {
       setState("activity", (a) => [
         ...a,
@@ -97,6 +98,7 @@ function LoopyAppContent() {
       activity={
         <ActivityPanel
           activity={state.activity}
+          isThinking={() => state.isThinking}
           inputValue={activityInput}
           onInput={setActivityInput}
           onSubmit={handleActivitySubmit}

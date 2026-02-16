@@ -17,11 +17,13 @@ export async function runLoopy(
   context: LoopyContext,
   tools: Record<string, AgentTool>,
   maxIterations: number = 10,
+  userInputQueue: string[] = [],
 ) {
   const loop = agentLoop(prompt, {
     provider,
     tools,
     maxIterations,
+    userInputQueue,
   });
 
   for await (const event of loop) {
@@ -31,13 +33,18 @@ export async function runLoopy(
 
 function handleLoopEvent(event: LoopEvent, { setState }: LoopyContext) {
   switch (event.type) {
+    case "thinking":
+      setState("isThinking", true);
+      break;
     case "text":
+      setState("isThinking", false);
       setState("activity", (a) => [
         ...a,
         { timestamp: event.timestamp, type: "thought", message: event.data },
       ]);
       break;
     case "tool_call":
+      setState("isThinking", false);
       setState("activity", (a) => [
         ...a,
         {
@@ -60,6 +67,7 @@ function handleLoopEvent(event: LoopEvent, { setState }: LoopyContext) {
       ]);
       break;
     case "error":
+      setState("isThinking", false);
       setState("activity", (a) => [
         ...a,
         {
@@ -68,6 +76,9 @@ function handleLoopEvent(event: LoopEvent, { setState }: LoopyContext) {
           message: event.data.message,
         },
       ]);
+      break;
+    case "done":
+      setState("isThinking", false);
       break;
   }
 }

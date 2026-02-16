@@ -34,10 +34,10 @@ This plan outlines the steps to add a styled, interactive text input area to the
 
 ## Phase 4: Advanced Input Interactions
 
-- [ ] Task: Implement Command History
-    - [ ] Write tests for Up/Down arrow key history navigation.
-    - [ ] Implement an in-memory history stack in `ActivityInput`.
-- [ ] Task: Multi-line Support
-    - [ ] Write tests for Shift+Enter behavior.
-    - [ ] Update the input handling to distinguish between `Enter` (submit) and `Shift+Enter` (newline).
+- [x] Task: Implement Command History 145b366
+    - [x] Write tests for Up/Down arrow key history navigation.
+    - [x] Implement an in-memory history stack in `ActivityInput`.
+- [x] Task: Multi-line Support 76b3b84
+    - [x] Write tests for Shift+Enter behavior.
+    - [x] Update the input handling to distinguish between `Enter` (submit) and `Shift+Enter` (newline).
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Advanced Input Interactions' (Protocol in workflow.md)

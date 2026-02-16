@@ -6,7 +6,8 @@
   "license": "MIT",
   "author": "",
   "bin": {
-    "tui-agent": "./bin/cli.ts"
+    "tui-agent": "./bin/cli.ts",
+    "loopy": "./bin/cli.ts"
   },
   "scripts": {
     "dev": "bun run --preload @opentui/solid/preload src/index.tsx",

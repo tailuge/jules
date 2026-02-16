@@ -1,5 +1,5 @@
 import { render } from "@opentui/solid";
-import { App } from "./app";
+import { LoopyApp } from "./components/LoopyApp";
 import {
   initConsoleCapture,
   initRuntimeErrorCapture,
@@ -10,4 +10,4 @@ initConsoleCapture();
 initRuntimeErrorCapture();
 registerAllTools();
 
-render(() => <App />, { exitOnCtrlC: false });
+render(() => <LoopyApp />, { exitOnCtrlC: true });

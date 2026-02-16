@@ -7,7 +7,7 @@ await Bun.build({
   entrypoints: ["./src/index.tsx"],
   target: "bun",
   compile: {
-    outfile: "./dist/tui-agent",
+    outfile: "./dist/loopy",
   },
   plugins: [solidPlugin],
 });

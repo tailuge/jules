@@ -18,7 +18,7 @@ bun run start    # Same as dev
 ## Build
 
 ```bash
-bun run build    # Compile to dist/tui-agent
+bun run build    # Compile to dist/loopy
 ```
 
 ## Code Quality

@@ -53,12 +53,12 @@ export function addCapturedMessage(level: LogLevel, message: string): void {
     timestamp,
   };
 
-  // Write to debug log file
+  // Immediate write to debug log file
   try {
     const logLine = `[${timestamp.toISOString()}] [${level.toUpperCase()}] ${message}\n`;
     appendFileSync(DEBUG_LOG_PATH, logLine);
   } catch (err) {
-    // Ignore log file errors to prevent infinite loops if console.log fails
+    // Ignore log file errors
   }
 
   setCapturedMessages((prev) => {
@@ -87,18 +87,27 @@ export function initConsoleCapture(): void {
   originalConsoleWarn = console.warn;
 
   console.log = (...args: unknown[]) => {
-    captureMessage("log", ...args);
-    originalConsoleLog!.apply(console, args);
+    const formatted = formatArgs(args);
+    addCapturedMessage("log", formatted);
+    if (originalConsoleLog) {
+      originalConsoleLog.apply(console, args);
+    }
   };
 
   console.error = (...args: unknown[]) => {
-    captureMessage("error", ...args);
-    originalConsoleError!.apply(console, args);
+    const formatted = formatArgs(args);
+    addCapturedMessage("error", formatted);
+    if (originalConsoleError) {
+      originalConsoleError.apply(console, args);
+    }
   };
 
   console.warn = (...args: unknown[]) => {
-    captureMessage("warn", ...args);
-    originalConsoleWarn!.apply(console, args);
+    const formatted = formatArgs(args);
+    addCapturedMessage("warn", formatted);
+    if (originalConsoleWarn) {
+      originalConsoleWarn.apply(console, args);
+    }
   };
 
   isCapturing = true;

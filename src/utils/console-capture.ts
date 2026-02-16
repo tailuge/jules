@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { appendFileSync, writeFileSync } from "node:fs";
 
 export type LogLevel = "log" | "error" | "warn";
 
@@ -7,6 +8,8 @@ export interface CapturedMessage {
   message: string;
   timestamp: Date;
 }
+
+const DEBUG_LOG_PATH = "/tmp/tailuge-debug.log";
 
 const [capturedMessages, setCapturedMessages] = createSignal<CapturedMessage[]>(
   [],
@@ -49,6 +52,15 @@ export function addCapturedMessage(level: LogLevel, message: string): void {
     message,
     timestamp,
   };
+
+  // Write to debug log file
+  try {
+    const logLine = `[${timestamp.toISOString()}] [${level.toUpperCase()}] ${message}\n`;
+    appendFileSync(DEBUG_LOG_PATH, logLine);
+  } catch (err) {
+    // Ignore log file errors to prevent infinite loops if console.log fails
+  }
+
   setCapturedMessages((prev) => {
     return [...prev, entry];
   });
@@ -61,6 +73,13 @@ function captureMessage(level: LogLevel, ...args: unknown[]): void {
 export function initConsoleCapture(): void {
   if (isCapturing) {
     return;
+  }
+
+  // Clear/Initialize debug log
+  try {
+    writeFileSync(DEBUG_LOG_PATH, `--- SESSION STARTED ${new Date().toISOString()} ---\n`);
+  } catch (err) {
+    // Ignore errors
   }
 
   originalConsoleLog = console.log;

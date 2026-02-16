@@ -12,7 +12,7 @@ This plan outlines the steps to add a styled, interactive text input area to the
     - [x] Update `ActivityPanel.tsx` (or `MainLayout.tsx`) to host the new component.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: UI Component & Layout Integration' (Protocol in workflow.md) 97040e1
 
-## Phase 2: Submission & Activity Logging
+## Phase 2: Submission & Activity Logging [checkpoint: 6f21ce6]
 
 - [x] Task: Implement message submission logic 800d9bd
     - [x] Write tests for the submission handler (Enter key clears input, triggers callback).
@@ -20,7 +20,7 @@ This plan outlines the steps to add a styled, interactive text input area to the
 - [x] Task: Add "user" log type styling 800d9bd
     - [x] Write tests for different log type color-coding in `ActivityPanel`.
     - [x] Update `ActivityPanel.tsx` to support a distinct color/prefix for user-submitted messages.
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Submission & Activity Logging' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Submission & Activity Logging' (Protocol in workflow.md) 6f21ce6
 
 ## Phase 3: Agent Loop Integration
 

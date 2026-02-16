@@ -45,6 +45,11 @@ function Demo() {
 
     await new Promise((r) => setTimeout(r, 1000));
     await statusTools.update_memory.execute({ item: "Looping is fun!" });
+
+    // Auto-exit after demo finishes or after a timeout
+    setTimeout(() => {
+      process.exit(0);
+    }, 5000);
   });
 
   return (

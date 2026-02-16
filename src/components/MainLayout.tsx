@@ -29,7 +29,8 @@ export function MainLayout(props: MainLayoutProps) {
     >
       <box
         flexDirection={orientation() === "wide" ? "column" : "row"}
-        flexBasis={orientation() === "wide" ? "40%" : "50%"}
+        width={orientation() === "wide" ? "40%" : "100%"}
+        height={orientation() === "wide" ? "100%" : "50%"}
         flexShrink={0}
       >
         <box flexGrow={1} flexBasis="0" borderStyle="single" title="Memory">

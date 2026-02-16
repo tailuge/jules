@@ -1,4 +1,5 @@
-import { Accessor, Setter, Show } from "solid-js";
+import { Accessor, Setter, Show, createSignal, onMount, onCleanup } from "solid-js";
+import { useKeyboard } from "@opentui/solid";
 
 interface ActivityInputProps {
   value: Accessor<string>;
@@ -9,6 +10,49 @@ interface ActivityInputProps {
 }
 
 export function ActivityInput(props: ActivityInputProps) {
+  const [history, setHistory] = createSignal<string[]>([]);
+  const [historyIndex, setHistoryIndex] = createSignal(-1);
+  const [tempInput, setTempInput] = createSignal("");
+
+  const handleSubmit = () => {
+    const val = props.value().trim();
+    if (val) {
+      setHistory((prev) => [...prev, val]);
+      setHistoryIndex(-1);
+      setTempInput("");
+      props.onSubmit();
+    }
+  };
+
+  useKeyboard((event) => {
+    if (!props.focused() || props.isThinking?.()) return;
+
+    if (event.name === "up") {
+      const h = history();
+      if (h.length === 0) return;
+
+      if (historyIndex() === -1) {
+        setTempInput(props.value());
+      }
+
+      const nextIndex = Math.min(historyIndex() + 1, h.length - 1);
+      setHistoryIndex(nextIndex);
+      props.onInput(h[h.length - 1 - nextIndex]);
+    } else if (event.name === "down") {
+      const h = history();
+      if (historyIndex() === -1) return;
+
+      const nextIndex = historyIndex() - 1;
+      setHistoryIndex(nextIndex);
+
+      if (nextIndex === -1) {
+        props.onInput(tempInput());
+      } else {
+        props.onInput(h[h.length - 1 - nextIndex]);
+      }
+    }
+  });
+
   return (
     <box 
       backgroundColor="#333333" 
@@ -21,7 +65,7 @@ export function ActivityInput(props: ActivityInputProps) {
       <input
         value={props.value()}
         onInput={props.onInput}
-        onSubmit={props.onSubmit as any}
+        onSubmit={handleSubmit as any}
         focused={props.focused() && !props.isThinking?.()}
         flexGrow={1}
       />

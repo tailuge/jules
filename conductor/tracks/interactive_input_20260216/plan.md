@@ -20,7 +20,7 @@ This plan outlines the steps to add a styled, interactive text input area to the
 - [x] Task: Add "user" log type styling 800d9bd
     - [x] Write tests for different log type color-coding in `ActivityPanel`.
     - [x] Update `ActivityPanel.tsx` to support a distinct color/prefix for user-submitted messages.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Submission & Activity Logging' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Submission & Activity Logging' (Protocol in workflow.md)
 
 ## Phase 3: Agent Loop Integration
 

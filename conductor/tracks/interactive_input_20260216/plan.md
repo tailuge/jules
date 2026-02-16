@@ -22,7 +22,7 @@ This plan outlines the steps to add a styled, interactive text input area to the
     - [x] Update `ActivityPanel.tsx` to support a distinct color/prefix for user-submitted messages.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Submission & Activity Logging' (Protocol in workflow.md) 6f21ce6
 
-## Phase 3: Agent Loop Integration
+## Phase 3: Agent Loop Integration [checkpoint: 90a77db]
 
 - [x] Task: Update `runLoopy` to support dynamic input 4e96ae1
     - [x] Write tests for `agentLoop` responding to external message injections.
@@ -30,7 +30,7 @@ This plan outlines the steps to add a styled, interactive text input area to the
 - [x] Task: Implement Thinking Indicator 4e96ae1
     - [x] Write tests for the visibility of the "Thinking..." status.
     - [x] Update the UI to display the indicator while the LLM is generating a response.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Agent Loop Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Agent Loop Integration' (Protocol in workflow.md) 90a77db
 
 ## Phase 4: Advanced Input Interactions
 

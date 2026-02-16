@@ -54,21 +54,40 @@ export async function* agentLoop(
 
   let iteration = 0;
 
-  while (iteration < config.maxIterations) {
-    iteration++;
-    config.onStep?.(iteration, config.maxIterations);
-
-    // Check for new user input from the queue
+  while (true) {
+    // 1. Check for new user input from the queue
     if (config.userInputQueue && config.userInputQueue.length > 0) {
       while (config.userInputQueue.length > 0) {
         const nextInput = config.userInputQueue.shift();
         if (nextInput) {
           messages.push({ role: "user", content: nextInput });
-          // Reset or extend iteration count when new input arrives
-          iteration = 1;
+          // Reset iteration count when new input arrives to allow more reasoning
+          iteration = 0;
         }
       }
     }
+
+    // 2. Check if we've exceeded max iterations for the current thought chain
+    if (iteration >= config.maxIterations) {
+      yield {
+        type: "done",
+        data: { iterations: iteration, maxReached: true },
+        timestamp: Date.now(),
+      };
+      
+      // If interactive, wait for more input instead of exiting
+      if (config.userInputQueue) {
+        while (config.userInputQueue.length === 0) {
+          await new Promise((r) => setTimeout(r, 100));
+        }
+        continue;
+      } else {
+        return;
+      }
+    }
+
+    iteration++;
+    config.onStep?.(iteration, config.maxIterations);
 
     try {
       const toolsObject = Object.fromEntries(
@@ -162,16 +181,22 @@ export async function* agentLoop(
         continue;
       }
 
-      if (config.userInputQueue && config.userInputQueue.length > 0) {
-        continue;
-      }
-
+      // No more tools to call, reasoning chain is complete for now
       yield {
         type: "done",
         data: { iterations: iteration },
         timestamp: Date.now(),
       };
-      return;
+      
+      // If interactive, wait for more input instead of exiting
+      if (config.userInputQueue) {
+        while (config.userInputQueue.length === 0) {
+          await new Promise((r) => setTimeout(r, 100));
+        }
+        continue;
+      } else {
+        return;
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       yield {
@@ -185,15 +210,18 @@ export async function* agentLoop(
         continue;
       }
 
+      // On error, if interactive, we might still want to wait for user to fix things
+      if (config.userInputQueue) {
+        while (config.userInputQueue.length === 0) {
+          await new Promise((r) => setTimeout(r, 100));
+        }
+        iteration = 0;
+        continue;
+      }
+
       break;
     }
   }
-
-  yield {
-    type: "done",
-    data: { iterations: iteration, maxReached: true },
-    timestamp: Date.now(),
-  };
 }
 
 export async function simpleAgentCall(

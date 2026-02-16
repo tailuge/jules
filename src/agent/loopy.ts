@@ -19,6 +19,10 @@ export async function runLoopy(
   maxIterations: number = 10,
   userInputQueue: string[] = [],
 ) {
+  context.setState("activity", (a) => [
+    ...a,
+    { timestamp: Date.now(), type: "info", message: "Agent loop initialized and running." },
+  ]);
   const loop = agentLoop(prompt, {
     provider,
     tools,
@@ -32,6 +36,7 @@ export async function runLoopy(
 }
 
 function handleLoopEvent(event: LoopEvent, { setState }: LoopyContext) {
+  console.log(`[LoopEvent] ${event.type}`, event.data);
   switch (event.type) {
     case "thinking":
       setState("isThinking", true);
@@ -79,6 +84,14 @@ function handleLoopEvent(event: LoopEvent, { setState }: LoopyContext) {
       break;
     case "done":
       setState("isThinking", false);
+      setState("activity", (a) => [
+        ...a,
+        {
+          timestamp: event.timestamp,
+          type: "info",
+          message: event.data.maxReached ? "Loop reached max iterations." : "Loop idle, waiting for input...",
+        },
+      ]);
       break;
   }
 }

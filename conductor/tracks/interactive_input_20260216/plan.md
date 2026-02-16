@@ -24,13 +24,13 @@ This plan outlines the steps to add a styled, interactive text input area to the
 
 ## Phase 3: Agent Loop Integration
 
-- [ ] Task: Update `runLoopy` to support dynamic input
-    - [ ] Write tests for `agentLoop` responding to external message injections.
-    - [ ] Modify `src/agent/loop.ts` or `loopy.ts` to allow pushing new user messages into the active loop context.
-- [ ] Task: Implement Thinking Indicator
-    - [ ] Write tests for the visibility of the "Thinking..." status.
-    - [ ] Update the UI to display the indicator while the LLM is generating a response.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Agent Loop Integration' (Protocol in workflow.md)
+- [x] Task: Update `runLoopy` to support dynamic input 4e96ae1
+    - [x] Write tests for `agentLoop` responding to external message injections.
+    - [x] Modify `src/agent/loop.ts` or `loopy.ts` to allow pushing new user messages into the active loop context.
+- [x] Task: Implement Thinking Indicator 4e96ae1
+    - [x] Write tests for the visibility of the "Thinking..." status.
+    - [x] Update the UI to display the indicator while the LLM is generating a response.
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Agent Loop Integration' (Protocol in workflow.md)
 
 ## Phase 4: Advanced Input Interactions
 

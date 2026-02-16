@@ -41,6 +41,13 @@ function LoopyAppContent() {
 
   createEffect(() => {
     const config = context.config();
+    if (!config) {
+        setState("activity", (a) => [
+          ...a,
+          { timestamp: Date.now(), type: "info", message: "Waiting for configuration..." },
+        ]);
+        return;
+    }
     if (config && !loopStarted) {
       loopStarted = true;
       startLoop(config);

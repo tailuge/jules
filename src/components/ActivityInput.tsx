@@ -26,7 +26,7 @@ export function ActivityInput(props: ActivityInputProps) {
         flexGrow={1}
       />
       <Show when={props.isThinking?.()}>
-        <text fg="#00FFFF"> Thinking...</text>
+        <text fg="#00FFFF" bold> [THINKING...] </text>
       </Show>
     </box>
   );

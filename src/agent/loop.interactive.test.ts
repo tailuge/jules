@@ -39,19 +39,23 @@ describe("agentLoop interactive", () => {
     result = await loop.next();
     expect(result.value.type).toBe("text");
 
-    // Inject "Second" AFTER first response
+    // 3. Done (waiting for input)
+    result = await loop.next();
+    expect(result.value.type).toBe("done");
+
+    // Inject "Second" AFTER loop is waiting
     userInputQueue.push("Second");
 
-    // 3. Thinking (picked up "Second")
+    // 4. Thinking (picked up "Second")
     result = await loop.next();
     expect(result.value.type).toBe("thinking");
-    expect(result.value.data.iteration).toBe(1); // It reset iteration to 1
+    expect(result.value.data.iteration).toBe(1);
 
-    // 4. Text (Second response)
+    // 5. Text (Second response)
     result = await loop.next();
     expect(result.value.type).toBe("text");
     
-    // Should be done now
+    // 6. Done (waiting again)
     result = await loop.next();
     expect(result.value.type).toBe("done");
   });

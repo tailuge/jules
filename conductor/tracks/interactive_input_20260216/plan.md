@@ -4,7 +4,7 @@ This plan outlines the steps to add a styled, interactive text input area to the
 
 ## Phase 1: UI Component & Layout Integration
 
-- [ ] Task: Create the `ActivityInput` component
+- [x] Task: Create the `ActivityInput` component ff72210
     - [ ] Write unit tests for `ActivityInput` rendering, focus behavior, and custom styling.
     - [ ] Implement `ActivityInput.tsx` using OpenTUI/SolidJS with the requested styling (grey background, white cursor).
 - [ ] Task: Integrate `ActivityInput` into the Activity Panel

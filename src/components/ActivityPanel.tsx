@@ -24,8 +24,11 @@ export function ActivityPanel(props: ActivityPanelProps) {
                   ? "#00FF00"
                   : log.type === "thought"
                     ? "#AAAAAA"
-                    : "#FFFFFF";
-            return <text fg={color}>{log.message}</text>;
+                    : log.type === "user"
+                      ? "#00FFFF"
+                      : "#FFFFFF";
+            const prefix = log.type === "user" ? "> " : "";
+            return <text fg={color}>{prefix}{log.message}</text>;
           }}
         </For>
       </box>

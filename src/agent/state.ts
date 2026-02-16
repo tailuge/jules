@@ -8,7 +8,7 @@ export interface Goal {
 
 export interface ActivityLog {
   timestamp: number;
-  type: "info" | "tool" | "thought" | "error";
+  type: "info" | "tool" | "thought" | "error" | "user";
   message: string;
 }
 

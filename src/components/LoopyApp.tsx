@@ -27,8 +27,15 @@ function LoopyAppContent() {
   const [activityFocused, setActivityFocused] = createSignal(true);
 
   const handleActivitySubmit = () => {
-    // Phase 2: Logic for processing input
-    setActivityInput("");
+    const trimmed = activityInput().trim();
+    if (trimmed) {
+      setState("activity", (a) => [
+        ...a,
+        { timestamp: Date.now(), type: "user", message: trimmed },
+      ]);
+      // TODO: In Phase 3, we will pass this to the agent loop
+      setActivityInput("");
+    }
   };
 
   createEffect(() => {

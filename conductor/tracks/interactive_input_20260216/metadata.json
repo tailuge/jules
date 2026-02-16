@@ -1,0 +1,8 @@
+{
+  "track_id": "interactive_input_20260216",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-16T16:45:00Z",
+  "updated_at": "2026-02-16T16:45:00Z",
+  "description": "At the bottom of the activity panel I want a text entry area, styles somehwat like gemini-cli lighter grey with white cursor. This will allow me to type text and it gets sent to the LLM, there already exists for this agentic loops so reuse that."
+}

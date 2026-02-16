@@ -2,15 +2,15 @@
 
 This plan outlines the steps to add a styled, interactive text input area to the bottom of the Activity panel, allowing real-time user-agent interaction.
 
-## Phase 1: UI Component & Layout Integration
+## Phase 1: UI Component & Layout Integration [checkpoint: 97040e1]
 
 - [x] Task: Create the `ActivityInput` component ff72210
-    - [ ] Write unit tests for `ActivityInput` rendering, focus behavior, and custom styling.
-    - [ ] Implement `ActivityInput.tsx` using OpenTUI/SolidJS with the requested styling (grey background, white cursor).
+    - [x] Write unit tests for `ActivityInput` rendering, focus behavior, and custom styling.
+    - [x] Implement `ActivityInput.tsx` using OpenTUI/SolidJS with the requested styling (grey background, white cursor).
 - [x] Task: Integrate `ActivityInput` into the Activity Panel 46f220a
-    - [ ] Write tests to ensure the input remains fixed at the bottom of the Activity panel while logs scroll above.
-    - [ ] Update `ActivityPanel.tsx` (or `MainLayout.tsx`) to host the new component.
-- [~] Task: Conductor - User Manual Verification 'Phase 1: UI Component & Layout Integration' (Protocol in workflow.md)
+    - [x] Write tests to ensure the input remains fixed at the bottom of the Activity panel while logs scroll above.
+    - [x] Update `ActivityPanel.tsx` (or `MainLayout.tsx`) to host the new component.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: UI Component & Layout Integration' (Protocol in workflow.md) 97040e1
 
 ## Phase 2: Submission & Activity Logging
 

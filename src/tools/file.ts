@@ -119,12 +119,9 @@ const listDirTool = createAgentTool({
   description: 'List files and directories in a path',
   parameters: listDirSchema,
   execute: async ({ path }) => {
-    if (!path) {
-      return { error: 'Path is required', success: false };
-    }
-
+    const targetPath = path || '.';
     try {
-      const resolvedPath = resolvePath(path);
+      const resolvedPath = resolvePath(targetPath);
       const dir = await Array.fromAsync(
         new Bun.Glob('*').scan({ cwd: resolvedPath, onlyFiles: false })
       );

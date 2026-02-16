@@ -18,6 +18,7 @@ export async function runLoopy(
   tools: Record<string, AgentTool>,
   maxIterations: number = 10,
   userInputQueue: string[] = [],
+  systemPrompt?: string,
 ) {
   context.setState("activity", (a) => [
     ...a,
@@ -28,6 +29,7 @@ export async function runLoopy(
     tools,
     maxIterations,
     userInputQueue,
+    systemPrompt,
   });
 
   for await (const event of loop) {

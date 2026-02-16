@@ -1,5 +1,4 @@
-import { Accessor, Setter, Show, createSignal, onMount, onCleanup } from "solid-js";
-import { useKeyboard } from "@opentui/solid";
+import { Accessor, Setter, Show, createSignal } from "solid-js";
 
 interface ActivityInputProps {
   value: Accessor<string>;
@@ -17,6 +16,7 @@ export function ActivityInput(props: ActivityInputProps) {
   const handleSubmit = () => {
     const val = props.value().trim();
     if (val) {
+      console.log(`[ActivityInput] Adding to history: ${val}`);
       setHistory((prev) => [...prev, val]);
       setHistoryIndex(-1);
       setTempInput("");
@@ -24,17 +24,11 @@ export function ActivityInput(props: ActivityInputProps) {
     }
   };
 
-  useKeyboard((event) => {
-    if (!props.focused() || props.isThinking?.()) return;
+  const handleKeyDown = (event: any) => {
+    if (props.isThinking?.()) return;
 
-    if (event.name === "return") {
-      if (event.shift) {
-        // Shift+Enter -> Newline
-        props.onInput(props.value() + "\n");
-      } else {
-        // Regular Enter -> Submit
-        // (Handled by <input onSubmit> but we can also handle it here if needed)
-      }
+    if (event.name === "return" && event.shift) {
+      props.onInput(props.value() + "\n");
     } else if (event.name === "up") {
       const h = history();
       if (h.length === 0) return;
@@ -59,7 +53,7 @@ export function ActivityInput(props: ActivityInputProps) {
         props.onInput(h[h.length - 1 - nextIndex]);
       }
     }
-  });
+  };
 
   return (
     <box 
@@ -74,6 +68,7 @@ export function ActivityInput(props: ActivityInputProps) {
         value={props.value()}
         onInput={props.onInput}
         onSubmit={handleSubmit as any}
+        onKeyDown={handleKeyDown as any}
         focused={props.focused() && !props.isThinking?.()}
         flexGrow={1}
       />

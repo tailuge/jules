@@ -27,7 +27,15 @@ export function ActivityInput(props: ActivityInputProps) {
   useKeyboard((event) => {
     if (!props.focused() || props.isThinking?.()) return;
 
-    if (event.name === "up") {
+    if (event.name === "return") {
+      if (event.shift) {
+        // Shift+Enter -> Newline
+        props.onInput(props.value() + "\n");
+      } else {
+        // Regular Enter -> Submit
+        // (Handled by <input onSubmit> but we can also handle it here if needed)
+      }
+    } else if (event.name === "up") {
       const h = history();
       if (h.length === 0) return;
 
@@ -58,7 +66,7 @@ export function ActivityInput(props: ActivityInputProps) {
       backgroundColor="#333333" 
       paddingLeft={1} 
       paddingRight={1}
-      height={1}
+      minHeight={1}
       width="100%"
       flexDirection="row"
     >
